@@ -1,0 +1,134 @@
+{
+   "templates": [
+      {
+         "type": "template",
+         "name": "HomePage",
+         "children": [
+            {
+               "type": "html",
+               "name": "div",
+               "attributes": [
+                  {
+                     "name": "class",
+                     "value": "container"
+                  }
+               ],
+               "children": [
+                  {
+                     "type": "text",
+                     "text": "Hello World!"
+                  }
+               ]
+            },
+            {
+               "type": "loop",
+               "dataset": "customers",
+               "children": [
+                  {
+                     "type": "inclusion",
+                     "name": "CustomersItem"
+                  }
+               ]
+            },
+            {
+               "type": "condition",
+               "condition": "Meteor.user()",
+               "true": [
+                  {
+                     "type": "text",
+                     "text": "You are logged in!"
+                  }
+               ],
+               "false": [
+                  {
+                     "type": "text",
+                     "text": "You are not logged in!"
+                  }
+               ]
+            }
+         ]
+      },
+      {
+         "type": "template",
+         "name": "CustomersItem",
+         "children": [
+            {
+               "type": "html",
+               "name": "div",
+               "selector": ".customers-item",
+               "attributes": [
+                  {
+                     "name": "class",
+                     "value": "customers-item {{itemClass this._id}}"
+                  }
+               ],
+               "children": [
+                  {
+                     "type": "text",
+                     "text": "Customer Name: {{name}}"
+                  },
+                  {
+                     "type": "html",
+                     "name": "input",
+                     "attributes": [
+                        {
+                           "name": "type",
+                           "value": "checkbox"
+                        },
+                        {
+                           "name": "{{isChecked this._id}}",
+                           "value": ""
+                        }
+                     ]
+                  }
+               ],
+               "events": [
+                  {
+                     "type": "event",
+                     "event": "click",
+                     "handler": "onClickCustomersItem"
+                  },
+                  {
+                     "type": "event",
+                     "event": "mouseover",
+                     "handler": "onClickCustomersItem"
+                  }
+               ]
+            }
+         ],
+         "handlers": [
+            {
+               "type": "handler",
+               "name": "onClickCustomersItem",
+               "code": "alert(\"Hello!\");\nalert(\"World!\");"
+            }
+         ],
+         "helpers": [
+            {
+               "type": "helper",
+               "name": "messageCount",
+               "arguments": [
+                  "userId"
+               ],
+               "code": "return 0;"
+            },
+            {
+               "type": "helper",
+               "name": "itemClass",
+               "arguments": [
+                  "id"
+               ],
+               "code": "return \"cool-item\";"
+            },
+            {
+               "type": "helper",
+               "name": "isChecked",
+               "arguments": [
+                  "id"
+               ],
+               "code": "return \"checked\";"
+            }
+         ]
+      }
+   ]
+}
