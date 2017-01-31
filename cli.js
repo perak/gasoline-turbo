@@ -141,7 +141,7 @@ switch(outputFormat) {
 	case "angular": {
 		console.log("");
 		console.log("Converting to Angular...");
-		gt.getAngular(inputObject, function(err, /* ,html, ...??? */) {
+		gt.getAngular(inputObject, function(err /* ,html, ...??? */) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);

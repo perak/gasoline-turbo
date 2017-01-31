@@ -8,6 +8,20 @@ Generates Blaze, React and Angular template from the same input.
 It works both as a command line tool or you can add it as any other npm module to your node.js and/or Meteor application. Works client-side in the browser too.
 
 
+Usage
+=====
+
+When installed as npm module, you can run CLI:
+
+```
+gasoline-turbo -i input.json -o output_dir -f blaze
+	-i, --input	Input file
+	-o, --output	Output directory
+	-f, --format	Output format. Can be "blaze", "react" or "angular". Default: "blaze".
+
+```
+
+
 Input
 =====
 
