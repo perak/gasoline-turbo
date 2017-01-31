@@ -1,6 +1,6 @@
 {
   "name": "gasoline-turbo",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Generic Template - generates blaze, react and angular code from the same input",
   "main": "gasoline-turbo.js",
   "scripts": {
@@ -16,6 +16,10 @@
     "react",
     "angular"
   ],
+  "preferGlobal": "true",
+  "bin": {
+    "gasoline-turbo" : "cli.js"
+  },
   "author": "Petar Korponaić <petar.korponaic@gmail.com>",
   "license": "MIT",
   "dependencies": {
