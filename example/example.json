@@ -85,12 +85,12 @@
                "events": [
                   {
                      "type": "event",
-                     "event": "click",
+                     "event": "onclick",
                      "handler": "onClickCustomersItem"
                   },
                   {
                      "type": "event",
-                     "event": "mouseover",
+                     "event": "onmouseover",
                      "handler": "onClickCustomersItem"
                   }
                ]

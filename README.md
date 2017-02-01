@@ -220,7 +220,7 @@ Event handler is defined in element's parent "template" object, and can be attac
 					events: [
            			   {
                              "type": "event",
-                             "event": "click",
+                             "event": "onclick",
                              "handler": "onNiceClick"
                        }
 					]
@@ -240,6 +240,7 @@ Event handler is defined in element's parent "template" object, and can be attac
 }
 ```
 `selector` is used in blaze, in this example click to any element with class `.nice-button` will execute handler.
+`event` is HTML event attribute name, for example: `onclick`
 
 Resulting code:
 

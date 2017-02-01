@@ -89,6 +89,77 @@ var reactAttrs = {
 	"wmode": "wmode"
 };
 
+var reactEvents = {
+	"oncopy": "onCopy",
+	"oncut": "onCut",
+	"onpaste": "onPaste",
+	"oncompositionend": "onCompositionEnd",
+	"oncompositionstart": "onCompositionStart",
+	"oncompositionupdate": "onCompositionUpdate",
+	"onkeydown": "onKeyDown",
+	"onkeypress": "onKeyPress",
+	"onkeyup": "onKeyUp",
+	"onfocus": "onFocus",
+	"onblur": "onBlur",
+	"onchange": "onChange",
+	"oninput": "onInput",
+	"onsubmit": "onSubmit",
+	"onclick": "onClick",
+	"oncontextmenu": "onContextMenu",
+	"ondoubleclick": "onDoubleClick",
+	"ondrag": "onDrag",
+	"ondragend": "onDragEnd",
+	"ondragenter": "onDragEnter",
+	"ondragexit": "onDragExit",
+	"ondragleave": "onDragLeave",
+	"ondragover": "onDragOver",
+	"ondragstart": "onDragStart",
+	"ondrop": "onDrop",
+	"onmousedown": "onMouseDown",
+	"onmouseenter": "onMouseEnter",
+	"onmouseleave": "onMouseLeave",
+	"onmousemove": "onMouseMove",
+	"onmouseout": "onMouseOut",
+	"onmouseover": "onMouseOver",
+	"onmouseup": "onMouseUp",
+	"onselect": "onSelect",
+	"ontouchcancel": "onTouchCancel",
+	"ontouchend": "onTouchEnd",
+	"ontouchmove": "onTouchMove",
+	"ontouchstart": "onTouchStart",
+	"onscroll": "onScroll",
+	"onwheel": "onWheel",
+	"onabort": "onAbort",
+	"oncanplay": "onCanPlay",
+	"oncanplaythrough": "onCanPlayThrough",
+	"ondurationchange": "onDurationChange",
+	"onemptied": "onEmptied",
+	"onencrypted": "onEncrypted",
+	"onended": "onEnded",
+	"onerror": "onError",
+	"onloadeddata": "onLoadedData",
+	"onloadedmetadata": "onLoadedMetadata",
+	"onloadstart": "onLoadStart",
+	"onpause": "onPause",
+	"onplay": "onPlay",
+	"onplaying": "onPlaying",
+	"onprogress": "onProgress",
+	"onratechange": "onRateChange",
+	"onseeked": "onSeeked",
+	"onseeking": "onSeeking",
+	"onstalled": "onStalled",
+	"onsuspend": "onSuspend",
+	"ontimeupdate": "onTimeUpdate",
+	"onvolumechange": "onVolumeChange",
+	"onwaiting": "onWaiting",
+	"onload": "onLoad",
+	"onerror": "onError",
+	"onanimationstart": "onAnimationStart",
+	"onanimationend": "onAnimationEnd",
+	"onanimationiteration": "onAnimationIteration",
+	"ontransitionend": "onTransitionEnd"
+};
+
 var getTabs = function(depth) {
 	var str = "";
 	for(var i = 0; i < depth; i++) {
@@ -175,7 +246,11 @@ var getBlaze = function(input, cb) {
 								if(handler) {
 									handler.selectors = handler.selectors || [];
 								}
-								var selector = event.event + " " + child.selector;
+								var evt = (event.event || "").toLowerCase();
+								if(evt.indexOf("on") == 0) {
+									evt = evt.slice(2);
+								}
+								var selector = evt + " " + child.selector;
 								if(handler.selectors.indexOf(selector) < 0) {
 									handler.selectors.push(selector);
 								}
@@ -441,11 +516,13 @@ var getReact = function(input, cb) {
 
 				s += argStr;
 				s += ")";
+				s = "this." + s;
 			} else {
 				// no args. Can be function call (helper) or dataset field name
 				if(context == "this" && s.indexOf(".") < 0) {
 					// most likelly it's a helper
 					s += "()";
+					s = "this." + s;
 				} else {
 					// smells like dataset field
 					s = context + "." + s;
@@ -489,6 +566,16 @@ var getReact = function(input, cb) {
 							var valConverted = blazeHelperCallsToReact(attribute.value, context);
 							jsx += "=\"" + valConverted + "\"";
 						}
+					});
+				}
+
+				if(child.events) {
+					child.events.map(function(event) {
+						jsx += " ";
+						jsx += reactEvents[event.event];
+						jsx += "={";
+						jsx += "this." + event.handler;
+						jsx += "}";
 					});
 				}
 
@@ -587,7 +674,37 @@ var getReact = function(input, cb) {
 
 		jsx += "export const " + template.name + " = React.createClass({\n";
 
-		jsx += "\trender() {\n";
+		// Helpers
+		if(template.helpers) {
+			template.helpers.map(function(helper) {
+				jsx += "\n\t" + helper.name + "(";
+				if(helper.arguments) {
+					var argStr = "";
+					helper.arguments.map(function(arg) {
+						if(argStr) {
+							argStr += ", ";
+						}
+						argStr += arg;
+					});
+					jsx += argStr;
+				}
+				jsx += ") {\n";
+				jsx += identMultilineString(helper.code, 2);
+				jsx += "\n\t},\n";
+			});
+		}
+
+		// Event handlers
+		if(template.handlers) {
+			template.handlers.map(function(handler) {
+				jsx += "\n\t" + handler.name + "(e) {\n";
+				jsx += identMultilineString(handler.code, 2);
+				jsx += "\n\t},\n";
+			});
+		}
+
+		// Render
+		jsx += "\n\trender() {\n";
 		jsx += "\t\treturn (\n";
 
 		if(template.children) {
