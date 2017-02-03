@@ -186,7 +186,7 @@ Example div with text:
 
 That will produce:
 
-```
+```html
 <div class="container">
 	Hello World!
 </div>
@@ -239,6 +239,7 @@ Event handler is defined in element's parent "template" object, and can be attac
 	]
 }
 ```
+
 `selector` is used in blaze, in this example click to any element with class `.nice-button` will execute handler.
 `event` is HTML event attribute name, for example: `onclick`
 
@@ -264,7 +265,7 @@ export const HomePage = React.createClass({
 
 	render() {
 		return (
-			<button className="nice-button" onClick={onNiceClick}></div>
+			<button className="nice-button" onClick={this.onNiceClick}></div>
 		);
 	}
 });
@@ -333,7 +334,6 @@ Conditional rendering. If expression evals true render one content else render a
 
    ]
 }
-
 ```
 
 Property `true` is array of children which will be rendered if condition evals `true`.
@@ -341,7 +341,7 @@ Property `false` is array of children which will be rendered if condition evals 
 
 Example input:
 
-```
+```js
 {
    "type": "condition",
    "condition": "currentUser",
@@ -358,7 +358,6 @@ Example input:
       }
    ]
 }
-
 ```
 
 Output:
