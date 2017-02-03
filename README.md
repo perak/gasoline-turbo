@@ -8,6 +8,17 @@ Generates Blaze, React and Angular template from the same input.
 It works both as a command line tool or you can add it as any other npm module to your node.js and/or Meteor application. Works client-side in the browser too.
 
 
+Project status
+==============
+
+Under development - just started.
+
+
+Visual UI
+=========
+
+Example application using this package (Gasoline Visual UI) you can see here: [https://petrol-vxjhqipnjh.now.sh/](https://petrol-vxjhqipnjh.now.sh/)
+
 Usage
 =====
 

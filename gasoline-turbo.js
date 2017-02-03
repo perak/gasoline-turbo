@@ -16,6 +16,40 @@ var voidElements = [
 	"wbr"
 ];
 
+var inlineElements = [
+	"b",
+	"big",
+	"i",
+	"small",
+	"tt",
+	"abbr",
+	"acronym",
+	"cite",
+	"code",
+	"dfn",
+	"em",
+	"kbd",
+	"strong",
+	"samp",
+	"var",
+	"a",
+	"bdo",
+	"br",
+	"img",
+	"map",
+	"object",
+	"q",
+	"script",
+	"span",
+	"sub",
+	"sup",
+	"button",
+	"input",
+	"label",
+	"select",
+	"textarea"
+];
+
 var reactAttrs = {
 	"accept": "accept",
 	"accesskey": "accessKey",
@@ -352,6 +386,10 @@ var findSelectedObject = function(input) {
 	return null;
 };
 
+var acceptChildren = function(object) {
+	return !(object.type == "text" || (object.type == "html" && voidElements.indexOf(object.name) >= 0));
+};
+
 var addObject = function(input, parentId, object) {
 	var parent = findObject(input, parentId);
 	if(!parent) {
@@ -359,7 +397,7 @@ var addObject = function(input, parentId, object) {
 	}
 
 	// text cannot accept children
-	if(parent.type == "text") {
+	if(!acceptChildren(parent)) {
 		return;
 	}
 
@@ -956,6 +994,19 @@ var getHTML = function(input, cb) {
 	var addChild = function(child, depth, context) {
 		var addNode = function(node, type, text) {
 			var isVoid = voidElements.indexOf(node.name) >= 0;
+			var isInline = inlineElements.indexOf(node.name) >= 0;
+
+			var containerElement = "div";
+			if(isInline && node.name != "input") {
+				containerElement = "span";
+			}
+
+			var containerClass = "gasoline-turbo";
+			if(node.selected) {
+				containerClass += " gasoline-turbo-selected";
+			}
+			html += getTabs(depth);
+			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\">\n";
 
 			html += getTabs(depth);
 			html += "<" + node.name;
@@ -964,7 +1015,11 @@ var getHTML = function(input, cb) {
 				node.attributes = [];
 			}
 
-			var preserveAttrs = ["type", "class"];
+			var preserveAttrs = [
+				"type",
+				"class"
+			];
+
 			var newAttributes = [];
 			newAttributes.push({ name: "data-id", value: node._id });
 
@@ -975,17 +1030,13 @@ var getHTML = function(input, cb) {
 				}
 			});
 
-			var gasClass = "gasoline-turbo gas-" + type;
+			var gasClass = "gas-element";
 			var classAttr = newAttributes.find(function(x) { return x.name == "class" });
 			if(!classAttr) {
 				newAttributes.push({ name: "class", value: gasClass });
 				classAttr = newAttributes.find(function(x) { return x.name == "class" });
 			} else {
 				classAttr.value = gasClass + " " + classAttr.value;
-			}
-
-			if(node.selected) {
-				classAttr.value += " " + "gasoline-turbo-selected";				
 			}
 
 			node.attributes = newAttributes;
@@ -1020,6 +1071,10 @@ var getHTML = function(input, cb) {
 				html += getTabs(depth);
 				html += "</" + node.name + ">\n";
 			}
+
+			// close container element
+			html += getTabs(depth);
+			html += "</" + containerElement + ">\n";
 		};
 
 
@@ -1173,6 +1228,7 @@ if(typeof module != "undefined" && module.exports) {
 	exports.findSelectedObject = findSelectedObject;
 	exports.selectObject = selectObject;
 
+	exports.acceptChildren = acceptChildren;
 	exports.addObject = addObject;
 	exports.removeObject = removeObject;
 
