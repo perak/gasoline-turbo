@@ -1,7 +1,7 @@
 Gasoline Turbo
 ==============
 
-**Generic Template** (but "Gasoline Turbo" sounds better) :)
+**Generic Template** (but "Gasoline Turbo" smells better)
 
 Generates Blaze, React and Angular template from the same input.
 
@@ -17,12 +17,12 @@ Under development - just started.
 Visual UI
 =========
 
-Example application using this package (Gasoline Visual UI) you can see here: [https://petrol-vxjhqipnjh.now.sh/](https://petrol-vxjhqipnjh.now.sh/)
+Example application using this package (Gasoline Visual UI) you can see here: [https://petrol-dxjqjlwnpx.now.sh//](https://petrol-dxjqjlwnpx.now.sh/)
 
 Usage
 =====
 
-When installed as npm module, you can run CLI:
+When installed globally as npm module `npm install -g gasoline-turbo`, you can run CLI from your terminal:
 
 ```
 gasoline-turbo -i input.json -o output_dir -f blaze
@@ -31,6 +31,14 @@ gasoline-turbo -i input.json -o output_dir -f blaze
 	-f, --format	Output format. Can be "blaze", "react" or "angular". Default: "blaze".
 
 ```
+
+Or you can add it to your Meteor application by running `meteor npm install --save gasoline-turbo` and in your code:
+
+```
+const gasoline = require("gasoline-turbo");
+```
+
+*(works both-client side and server-side)*
 
 
 Input
