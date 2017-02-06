@@ -28,7 +28,7 @@ When installed globally as npm module `npm install -g gasoline-turbo`, you can r
 gasoline-turbo -i input.json -o output_dir -f blaze
 	-i, --input	Input file
 	-o, --output	Output directory
-	-f, --format	Output format. Can be "blaze", "react" or "angular". Default: "blaze".
+	-f, --format	Output format. Can be "blaze", "react", "angular1" or "angular" for Angular 2. Default: "blaze".
 
 ```
 
@@ -126,9 +126,94 @@ export const HomePage = React.createClass({
 });
 ```
 
-**Angular**
+**Angular 1**
 
-(not implemented yet)
+HTML
+```html
+<homePage>
+</homePage>
+```
+
+JS
+```js
+//----------------------------------------
+//
+
+//----------------------------------------
+'use strict';
+import angular from 'angular';
+import angularMeteor from 'angular-meteor';
+import uiRouter from 'angular-ui-router';
+
+import homePageTemplate from './homepage.html';
+
+const name = 'home';
+var that;
+
+class Home {
+  constructor($scope, $reactive) {
+    'ngInject';
+
+    $reactive(this).attach($scope);
+    console.log("Home constructor");
+    this.scopeName = name;  // Helps when digging through Angular scopes
+    that = this;
+
+// Subscriptions...
+//    this.subscribe('things', () => []);
+
+    this.user = Meteor.user();  // Get current user
+
+    this.helpers({
+//    	things: () => Things.find()
+    });
+
+  }; // End of constructor
+} // End of class
+
+// create a module
+export default angular.module(name, [
+  angularMeteor
+  ,uiRouter
+]).component(name, {
+  template: homePageTemplate,
+  controller: Home
+})
+  .config(config)
+  .run(run);
+
+function config($locationProvider, $urlRouterProvider, $stateProvider) {
+  'ngInject';
+
+  // console.log("Home.config()");
+}
+
+function run($rootScope, $state) {
+  'ngInject';
+
+};
+```
+
+**Angular 2**
+
+HTML
+```html
+<home-page>
+</home-page>
+```
+
+TS (Typescript)
+```ts
+import { Component } from '@angular/core';
+
+@Component({
+  selector: 'home-page',
+  templateUrl: './home.component.html',
+  styleUrls: ['./home.component.css']
+})
+export class HomeComponent {
+  title = 'Home page works!';
+}```
 
 
 HTML node
@@ -333,7 +418,11 @@ JSX
 }
 ```
 
-**Angular**
+**Angular 1**
+
+(not implemented yet)
+
+**Angular 2**
 
 (not implemented yet)
 
@@ -403,7 +492,11 @@ JSX
 }
 ```
 
-**Angular**
+**Angular 1**
+
+(not implemented yet)
+
+**Angular 2**
 
 (not implemented yet)
 
