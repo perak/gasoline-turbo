@@ -16,6 +16,40 @@ var voidElements = [
 	"wbr"
 ];
 
+var inlineElements = [
+	"b",
+	"big",
+	"i",
+	"small",
+	"tt",
+	"abbr",
+	"acronym",
+	"cite",
+	"code",
+	"dfn",
+	"em",
+	"kbd",
+	"strong",
+	"samp",
+	"var",
+	"a",
+	"bdo",
+	"br",
+	"img",
+	"map",
+	"object",
+	"q",
+	"script",
+	"span",
+	"sub",
+	"sup",
+	"button",
+	"input",
+	"label",
+	"select",
+	"textarea"
+];
+
 var reactAttrs = {
 	"accept": "accept",
 	"accesskey": "accessKey",
@@ -160,6 +194,23 @@ var reactEvents = {
 	"ontransitionend": "onTransitionEnd"
 };
 
+var randomString = function(len) {
+	len = len || 17;
+
+	let text = "";
+	// let first char to be letter
+	let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	text += charset.charAt(Math.floor(Math.random() * charset.length));
+
+	// other chars can be numbers
+	charset += "0123456789";
+	for(var i = 0; i < len; i++) {
+		text += charset.charAt(Math.floor(Math.random() * charset.length));
+	}
+
+	return text;
+};
+
 var getTabs = function(depth) {
 	var str = "";
 	for(var i = 0; i < depth; i++) {
@@ -193,6 +244,198 @@ var replaceSubstrings = function(string, find, replace) {
 	return string.replace(new RegExp(escapeRegEx(find), 'g'), replace);
 };
 
+var addId = function(input, force) {
+	if(!input._id || force) {
+		input._id = randomString();
+	}
+
+	if(input.templates) {
+		input.templates.map(function(template) {
+			addId(template, force);
+		});
+	}
+
+	if(input.children) {
+		input.children.map(function(child) {
+			addId(child, force);
+		});
+	}
+};
+
+var selectObject = function(input, objectId) {
+	if(input._id && input._id == objectId) {
+		input.selected = true;
+	} else {
+		delete input.selected;
+	}
+
+	if(input.templates) {
+		input.templates.map(function(template) {
+			selectObject(template, objectId);
+		});
+	}
+
+	if(input.children) {
+		input.children.map(function(child) {
+			selectObject(child, objectId);
+		});
+	}
+
+	return null;
+};
+
+var findObject = function(input, objectId) {
+	if(input._id && input._id == objectId) {
+		return input;
+	}
+
+	if(input.templates) {
+		var found = null;
+		input.templates.find(function(template) {
+			found = findObject(template, objectId);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	if(input.children) {
+		var found = null;
+		input.children.find(function(child) {
+			found = findObject(child, objectId);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	return null;
+};
+
+var findParentObject = function(input, objectId) {
+	if(input.templates) {
+		if(!!input.templates.find(function(template) {
+			if(template._id && template._id == objectId) {
+				return true;
+			}
+		})) {
+			return input;
+		}
+
+		var found = null;
+		input.templates.find(function(template) {
+			found = findParentObject(template, objectId);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	if(input.children) {
+		if(!!input.children.find(function(child) {
+			if(child._id && child._id == objectId) {
+				return true;
+			}
+		})) {
+			return input;
+		}
+
+		var found = null;
+		input.children.find(function(child) {
+			found = findParentObject(child, objectId);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	return null;
+};
+
+var findSelectedObject = function(input) {
+	if(input.selected) {
+		return input;
+	}
+
+	if(input.templates) {
+		var found = null;
+		input.templates.find(function(template) {
+			found = findSelectedObject(template);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	if(input.children) {
+		var found = null;
+		input.children.find(function(child) {
+			found = findSelectedObject(child);
+			return !!found;
+		});
+		if(found) {
+			return found;
+		}
+	}
+
+	return null;
+};
+
+var acceptChildren = function(object) {
+	return !(object.type == "text" || (object.type == "html" && voidElements.indexOf(object.name) >= 0));
+};
+
+var addObject = function(input, parentId, object) {
+	var parent = findObject(input, parentId);
+	if(!parent) {
+		return;
+	}
+
+	// text cannot accept children
+	if(!acceptChildren(parent)) {
+		return;
+	}
+
+	if(!parent.children) {
+		parent.children = [];
+	}
+
+	var newObject = JSON.parse(JSON.stringify(object));
+
+	addId(newObject, true);
+
+	parent.children.push(newObject);
+
+	return newObject;
+};
+
+var removeObject = function(input, objectId) {
+	var parentObject = findParentObject(input, objectId);
+	if(!parentObject) {
+		return;
+	}
+
+	if(parentObject.templates) {
+		var index = parentObject.templates.findIndex(obj => obj._id == objectId);
+		if(index >= 0) {
+			parentObject.templates.splice(index, 1);
+			return;
+		}
+	}
+
+	if(parentObject.children) {
+		var index = parentObject.children.findIndex(obj => obj._id == objectId);
+		if(index >= 0) {
+			parentObject.children.splice(index, 1);
+			return;
+		}
+	}
+};
 
 // ============
 // BLAZE
@@ -734,13 +977,264 @@ var getReact = function(input, cb) {
 
 var getAngular = function(input, cb) {
 	// !!!
-	cb(new Error("Error: Sorry, Angular is not implemented yet."));
+	cb(new Error("Error: Sorry, Angular is not supported yet."));
 	// !!!
 };
 
 
+// ========================
+// HTML for Visual Designer
+// ========================
+
+var getHTML = function(input, cb) {
+	var html = "";
+
+	addId(input);
+
+	var addChild = function(child, depth, context) {
+		var addNode = function(node, type, text) {
+			var isVoid = voidElements.indexOf(node.name) >= 0;
+			var isInline = inlineElements.indexOf(node.name) >= 0;
+
+			var containerElement = "div";
+			if(isInline && node.name != "input") {
+				containerElement = "span";
+			}
+
+			var containerClass = "gasoline-turbo";
+			if(node.selected) {
+				containerClass += " gasoline-turbo-selected";
+			}
+			html += getTabs(depth);
+			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\">\n";
+
+			html += getTabs(depth);
+			html += "<" + node.name;
+
+			if(!node.attributes) {
+				node.attributes = [];
+			}
+
+			var preserveAttrs = [
+				"type",
+				"class"
+			];
+
+			var newAttributes = [];
+			newAttributes.push({ name: "data-id", value: node._id });
+
+			preserveAttrs.map(function(a) {
+				var attr = node.attributes.find(function(x) { return x.name == a; });
+				if(attr) {
+					newAttributes.push(attr);
+				}
+			});
+
+			var gasClass = "gas-element";
+			var classAttr = newAttributes.find(function(x) { return x.name == "class" });
+			if(!classAttr) {
+				newAttributes.push({ name: "class", value: gasClass });
+				classAttr = newAttributes.find(function(x) { return x.name == "class" });
+			} else {
+				classAttr.value = gasClass + " " + classAttr.value;
+			}
+
+			node.attributes = newAttributes;
+
+			if(node.attributes) {
+				node.attributes.map(function(attribute) {
+					html += " " + attribute.name;
+					if(attribute.value) {
+						html += "=\"" + attribute.value + "\"";
+					}
+				});
+			}
+
+			html += ">\n";
+
+			if(!isVoid) {
+				if(text) {
+					html += identMultilineString(text, depth);
+					html += "\n";
+				}
+
+				if(node.children) {
+					node.children.map(function(node) {
+						addChild(node, depth + 1, context);
+					});
+				}
+
+				if(!text && (!node.children || !node.children.length)) {
+					html += "&nbsp;";
+				}
+
+				html += getTabs(depth);
+				html += "</" + node.name + ">\n";
+			}
+
+			// close container element
+			html += getTabs(depth);
+			html += "</" + containerElement + ">\n";
+		};
+
+
+		switch(child.type) {
+			// ---
+			// HTML node
+			// ---
+			case "html": {
+				var node = JSON.parse(JSON.stringify(child));
+				addNode(node, child.type);
+			}; break;
+
+			// ---
+			// Loop
+			// ---
+			case "loop": {
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "div";
+				addNode(node, child.type);
+			}; break;
+
+			// ---
+			// Condition
+			// ---
+			case "condition": {
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "div";
+
+				var trueNode = {
+					_id: randomString(),
+					type: "html",
+					name: "div",
+					attributes: [
+						{ name: "class", value: "gasoline-turbo gas-condition-true" }
+					],
+					children: []
+				};
+				if(node.true) {
+					trueNode.children = JSON.parse(JSON.stringify(node.true));
+				}
+
+				var falseNode = {
+					_id: randomString(),
+					type: "html",
+					name: "div",
+					attributes: [
+						{ name: "class", value: "gasoline-turbo gas-condition-false" }
+					],
+					children: []
+				};
+				if(node.false) {
+					falseNode.children = JSON.parse(JSON.stringify(node.false));
+				}
+
+				node.children = [];
+				node.children.push(trueNode);
+				node.children.push(falseNode);
+				addNode(node, child.type);
+			}; break;
+
+			// ---
+			// Text
+			// ---
+			case "text": {
+
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "span";
+				addNode(node, child.type, child.text);
+
+			}; break;
+
+			// ---
+			// Inclusion
+			// ---
+			case "inclusion": {
+
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "span";
+				addNode(node, child.type, "{{> " + child.name + "}}");
+			}; break;
+		}
+	};
+
+	if(!input.templates) {
+		cb(new Error("Error: no templates found.", html, js));
+		return;
+	}
+
+	var error = false;
+
+	var output = [];
+
+	input.templates.map(function(template) {
+		if(template.type != "template") {
+			error = true;
+			cb(new Error("Error: unknown template type: \"" + template.type + "\"", html, js));
+			return;
+		}
+		if(!template.name) {
+			error = true;
+			cb(new Error("Error: invalid template name \"" + template.name + "\"", html, js));
+			return;
+		}
+
+		// ====
+		// HTML
+		// ====
+
+		if(html) {
+			html += "\n";
+		}
+
+		var templateClass = "gasoline-turbo gas-template";
+		if(template.selected) {
+			templateClass += " gasoline-turbo-selected";
+		}
+
+		html += "<div class=\""+ templateClass + "\" data-id=\"" + template._id + "\">\n";
+
+		if(template.children && template.children.length) {
+			template.children.map(function(child) {
+				addChild(child, 1, "this");
+			});
+		} else {
+			html += "&nbsp;"
+		}
+
+		html += "</div>\n";
+		html += "\n";
+
+		output.push({
+			html: html
+		});
+	});
+
+	if(!error) {
+		cb(null, output);
+	}
+};
+
+
+// ===
+
 if(typeof module != "undefined" && module.exports) {
+	exports.randomString = randomString;
+	exports.addId = addId;
+
+	exports.findObject = findObject;
+	exports.findParentObject = findParentObject;
+
+	exports.findSelectedObject = findSelectedObject;
+	exports.selectObject = selectObject;
+
+	exports.acceptChildren = acceptChildren;
+	exports.addObject = addObject;
+	exports.removeObject = removeObject;
+
 	exports.getBlaze = getBlaze;
 	exports.getReact = getReact;
 	exports.getAngular = getAngular;
+
+	exports.getHTML = getHTML;
 }

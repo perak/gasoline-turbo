@@ -1,17 +1,28 @@
 Gasoline Turbo
 ==============
 
-**Generic Template** (but "Gasoline Turbo" sounds better) :)
+**Generic Template** (but "Gasoline Turbo" smells better)
 
 Generates Blaze, React and Angular template from the same input.
 
 It works both as a command line tool or you can add it as any other npm module to your node.js and/or Meteor application. Works client-side in the browser too.
 
 
+Project status
+==============
+
+Under development - just started.
+
+
+Visual UI
+=========
+
+Example application using this package (Gasoline Visual UI) you can see here: [https://petrol-dxjqjlwnpx.now.sh//](https://petrol-dxjqjlwnpx.now.sh/)
+
 Usage
 =====
 
-When installed as npm module, you can run CLI:
+When installed globally as npm module `npm install -g gasoline-turbo`, you can run CLI from your terminal:
 
 ```
 gasoline-turbo -i input.json -o output_dir -f blaze
@@ -20,6 +31,14 @@ gasoline-turbo -i input.json -o output_dir -f blaze
 	-f, --format	Output format. Can be "blaze", "react", "angular1" or "angular" for Angular 2. Default: "blaze".
 
 ```
+
+Or you can add it to your Meteor application by running `meteor npm install --save gasoline-turbo` and in your code:
+
+```
+const gasoline = require("gasoline-turbo");
+```
+
+*(works both-client side and server-side)*
 
 
 Input
@@ -271,7 +290,7 @@ Example div with text:
 
 That will produce:
 
-```
+```html
 <div class="container">
 	Hello World!
 </div>
@@ -324,6 +343,7 @@ Event handler is defined in element's parent "template" object, and can be attac
 	]
 }
 ```
+
 `selector` is used in blaze, in this example click to any element with class `.nice-button` will execute handler.
 `event` is HTML event attribute name, for example: `onclick`
 
@@ -349,7 +369,7 @@ export const HomePage = React.createClass({
 
 	render() {
 		return (
-			<button className="nice-button" onClick={onNiceClick}></div>
+			<button className="nice-button" onClick={this.onNiceClick}></div>
 		);
 	}
 });
@@ -422,7 +442,6 @@ Conditional rendering. If expression evals true render one content else render a
 
    ]
 }
-
 ```
 
 Property `true` is array of children which will be rendered if condition evals `true`.
@@ -430,7 +449,7 @@ Property `false` is array of children which will be rendered if condition evals 
 
 Example input:
 
-```
+```js
 {
    "type": "condition",
    "condition": "currentUser",
@@ -447,7 +466,6 @@ Example input:
       }
    ]
 }
-
 ```
 
 Output:
