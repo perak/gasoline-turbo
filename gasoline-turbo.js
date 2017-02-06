@@ -987,9 +987,132 @@ var getAngular = function(input, cb) {
 // ============
 
 var getHTML = function(input, cb) {
-	// !!!
-	cb(new Error("Error: Sorry, not implemented yet."));
-	// !!!
+	var html = "";
+
+	var addChild = function(child, depth, context) {
+		switch(child.type) {
+			// ---
+			// HTML node
+			// ---
+			case "html": {
+				var isVoid = voidElements.indexOf(child.name) >= 0;
+
+				html += getTabs(depth);
+				html += "<" + child.name;
+
+				if(child.attributes) {
+					child.attributes.map(function(attribute) {
+						html += " " + attribute.name;
+						if(attribute.value) {
+							html += "=\"" + attribute.value + "\"";
+						}
+					});
+				}
+
+				html += ">\n";
+
+				if(!isVoid) {
+
+					if(child.children) {
+						child.children.map(function(child) {
+							addChild(child, depth + 1, context);
+						});					
+					}
+
+					html += getTabs(depth);
+					html += "</" + child.name + ">\n";
+				}
+			}; break;
+
+			// ---
+			// Loop
+			// ---
+			case "loop": {
+				if(child.children) {
+					child.children.map(function(child) {
+						addChild(child, depth + 1, child.dataset);
+					});					
+				}
+			}; break;
+
+			// ---
+			// Condition
+			// ---
+			case "condition": {
+				if(child.true) {
+					child.true.map(function(child) {
+						addChild(child, depth + 1, context);
+					});
+				}
+
+				if(child.false) {
+					child.false.map(function(child) {
+						addChild(child, depth + 1, context);
+					});
+				}
+			}; break;
+
+			// ---
+			// Text
+			// ---
+			case "text": {
+
+				html += identMultilineString(child.text, depth);
+				html += "\n";
+
+			}; break;
+
+			// ---
+			// Inclusion
+			// ---
+			case "inclusion": {
+
+			}; break;
+		}
+	};
+
+	if(!input.templates) {
+		cb(new Error("Error: no templates found.", html));
+		return;
+	}
+
+	var error = false;
+	input.templates.map(function(template) {
+		if(template.type != "template") {
+			error = true;
+			cb(new Error("Error: unknown template type: \"" + template.type + "\"", html));
+			return;
+		}
+		if(!template.name) {
+			error = true;
+			cb(new Error("Error: invalid template name \"" + template.name + "\"", html));
+			return;
+		}
+
+		if(template.handlers) {
+			eventHandlers = JSON.parse(JSON.stringify(template.handlers));
+		}
+
+		// ====
+		// HTML
+		// ====
+
+		if(html) {
+			html += "\n";
+		}
+
+		if(template.children && template.children.length) {
+			template.children.map(function(child) {
+				addChild(child, 1);
+			});
+
+			html += "\n";
+		}
+	});
+
+	if(!error) {
+		cb(null, html);
+	}
 };
 
 
