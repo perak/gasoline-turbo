@@ -1028,28 +1028,50 @@ var getHTML = function(input, cb) {
 			// Loop
 			// ---
 			case "loop": {
+				html += getTabs(depth);
+				html += "<div data-type=\"" + child.type + "\" data-source=\"" + child.dataset + "\">\n";
 				if(child.children) {
 					child.children.map(function(child) {
 						addChild(child, depth + 1, child.dataset);
 					});					
 				}
+				html += getTabs(depth);
+				html += "</div>\n";
 			}; break;
 
 			// ---
 			// Condition
 			// ---
 			case "condition": {
+				html += getTabs(depth);
+				html += "<div data-type=\"" + child.type + "\" data-condition=\"" + child.condition + "\">\n";
+
 				if(child.true) {
+					html += getTabs(depth + 1);
+					html += "<div data-type=\"" + child.type + "-true\">\n";
+
 					child.true.map(function(child) {
-						addChild(child, depth + 1, context);
+						addChild(child, depth + 2, context);
 					});
+
+					html += getTabs(depth + 1);
+					html += "</div>\n";
 				}
 
 				if(child.false) {
+					html += getTabs(depth + 1);
+					html += "<div data-type=\"" + child.type + "-false\">\n";
+
 					child.false.map(function(child) {
-						addChild(child, depth + 1, context);
+						addChild(child, depth + 2, context);
 					});
+
+					html += getTabs(depth + 1);
+					html += "</div>\n";
 				}
+
+				html += getTabs(depth);
+				html += "</div>\n";
 			}; break;
 
 			// ---

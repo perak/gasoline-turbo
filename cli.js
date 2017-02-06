@@ -24,7 +24,8 @@ var printUsage = function() {
 	console.log("\tgasoline-turbo -i input.json -o output_dir -f blaze");
 	console.log("\t\t-i, --input\tInput file");
 	console.log("\t\t-o, --output\tOutput directory");
-	console.log("\t\t-f, --format\tOutput format. Can be \"blaze\", \"react\" or \"angular\". Default: \"blaze\".");
+	console.log("\t\t-f, --format\tOutput format. Can be \"blaze\", \"react\", \"angular\" or \"html\". Default: \"blaze\".");
+	console.log("\t\t-w, --overwrite\tOverwrite existing output files.");
 	console.log("");
 	console.log("Enjoy! (and expect bugs)");
 	console.log("");
@@ -151,6 +152,23 @@ switch(outputFormat) {
 			// ...
 
 			console.log("");
+			console.log("Success.");
+			console.log("");
+		});
+
+	}; break;
+
+	case "html": {
+		console.log("");
+		console.log("Converting to static HTML...");
+		gt.getHTML(inputObject, function(err, html) {
+			if(err) {
+				console.log(err.message);
+				process.exit(1);
+			}
+
+			writeOutput(html, ".html");
+
 			console.log("Success.");
 			console.log("");
 		});
