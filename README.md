@@ -40,6 +40,8 @@ const gasoline = require("gasoline-turbo");
 
 *(works both-client side and server-side)*
 
+See [API reference](#api-reference) for list of exposed functions.
+
 
 Input
 =====
@@ -406,7 +408,130 @@ JSX
 (not implemented yet)
 
 
+#API Reference
+
+
+##randomString(len = 17)
+
+Simply returns unique random string. (e.g. `XlE1N31VZA7iGLG43M`)
+
+
+##addId(input, force = true)
+
+Fuction iterates through entire `input` tree and sets each object's `_id` member to random string. If argument `force` is set to `true` then function sets `_id` even if object already have `_id` set (overwrites _id with new unique random value).  
+
+
+##findObject(input, objectId)
+
+Searches `input` for object which `_id` equals `objectId` argument and returns that object. If object is not found then function returns `null`.
+
+
+##findParentObject(input, objectId)
+
+Function returns object's parent.
+
+
+##selectObject(input, objectId)
+
+Object which `_id` equals `objectId` will be marked as selected (member `selected` will be set to true). All other objects will be unselected (member `selected` will be removed).
+
+
+##findSelectedObject(input)
+
+Function will return (first) object which `selected` property is `true`.
+
+
+##acceptChildren(input, objectId)
+
+Function returns `true` if object can contain children. Otherwise returns `false`.
+
+
+##addObject(input, parentId, object)
+
+Function will add new object as a child of the object which `_id` equals `parentId`.
+
+
+##removeObject(input, objectId)
+
+Object which `_id` equals `objectId` argument will be removed from the input tree.
+
+
+##getBlaze(input, callback)
+
+Function returns blaze html and js.
+
+Example:
+
+```js
+getBlaze(input, function(err, html, js) {
+	if(err) {
+		alert(err);
+		return;
+	}
+
+	console.log(html);
+	console.log(js);
+});
+```
+
+##getReact(input, callback)
+
+Function returns react jsx.
+
+Example:
+
+```js
+getReact(input, function(err, jsx) {
+	if(err) {
+		alert(err);
+		return;
+	}
+
+	console.log(jsx);
+});
+```
+
+##getAngular(input, callback)
+
+*Sorry, angular is not supported yet*
+
+
+##getHTML(input, callback)
+
+Function returns pure static HTML - any control structures (loops, conditions etc.) are ignored, but their html content is included.
+
+Example:
+
+```js
+getHTML(input, function(err, html) {
+	if(err) {
+		alert(err);
+		return;
+	}
+
+	console.log(html);
+});
+```
+
+##getWireframe(input, callback)
+
+Function returns static HTML which can be used by [visual UI](#visual-ui).
+
+Each element is encapsulated into `<div class="gasoline-turbo" data-id="OBJECT ID"> ... </div>` or `<span class="gasoline-turbo" data-id="OBJECT ID"> ... </span>` ("div" or "span" - depending on is element inline or block-level entity).
+
+Example:
+
+```js
+getWireframe(input, function(err, html) {
+	if(err) {
+		alert(err);
+		return;
+	}
+
+	console.log(html);
+});
+```
+
 ---
 
 To be continued...
-

@@ -982,11 +982,22 @@ var getAngular = function(input, cb) {
 };
 
 
+// ============
+// HTML
+// ============
+
+var getHTML = function(input, cb) {
+	// !!!
+	cb(new Error("Error: Sorry, not implemented yet."));
+	// !!!
+};
+
+
 // ========================
 // HTML for Visual Designer
 // ========================
 
-var getHTML = function(input, cb) {
+var getWireframe = function(input, cb) {
 	var html = "";
 
 	addId(input);
@@ -1006,7 +1017,7 @@ var getHTML = function(input, cb) {
 				containerClass += " gasoline-turbo-selected";
 			}
 			html += getTabs(depth);
-			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\">\n";
+			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\" draggable=\"true\">\n";
 
 			html += getTabs(depth);
 			html += "<" + node.name;
@@ -1237,4 +1248,7 @@ if(typeof module != "undefined" && module.exports) {
 	exports.getAngular = getAngular;
 
 	exports.getHTML = getHTML;
+
+	exports.getWireframe = getWireframe;
+
 }
