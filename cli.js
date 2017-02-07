@@ -16,7 +16,7 @@ const optionDefinitions = [
 const args = commandLineArgs(optionDefinitions);
 
 console.log("");
-console.log("Generic Template (\"Gasoline Turbo\" sounds better)");
+console.log("Generic Template (GT - but \"Gasoline Turbo\" smells better)");
 
 var printUsage = function() {
 	console.log("");

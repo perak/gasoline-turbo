@@ -17,7 +17,7 @@ Under development - just started.
 Visual UI
 =========
 
-Example application using this package (Gasoline Visual UI) you can see here: [https://petrol-dxjqjlwnpx.now.sh//](https://petrol-dxjqjlwnpx.now.sh/)
+Example application using this package (Gasoline Visual UI) you can see here: [https://gasoline-turbo.meteorfarm.com](https://gasoline-turbo.meteorfarm.com)
 
 Usage
 =====
@@ -26,10 +26,10 @@ When installed globally as npm module `npm install -g gasoline-turbo`, you can r
 
 ```
 gasoline-turbo -i input.json -o output_dir -f blaze
-	-i, --input	Input file
+	-i, --input 	Input file
 	-o, --output	Output directory
-	-f, --format	Output format. Can be "blaze", "react", "angular1" or "angular" for Angular 2. Default: "blaze".
-
+	-f, --format	Output format. Can be "blaze", "react", "angular" or "html". Default: "blaze".
+	-w, --overwrite	Overwrite existing output files.
 ```
 
 Or you can add it to your Meteor application by running `meteor npm install --save gasoline-turbo` and in your code:
@@ -203,6 +203,7 @@ HTML
 ```
 
 TS (Typescript)
+
 ```ts
 import { Component } from '@angular/core';
 
@@ -213,7 +214,8 @@ import { Component } from '@angular/core';
 })
 export class HomeComponent {
   title = 'Home page works!';
-}```
+}
+```
 
 
 HTML node

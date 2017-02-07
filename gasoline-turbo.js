@@ -197,9 +197,9 @@ var reactEvents = {
 var randomString = function(len) {
 	len = len || 17;
 
-	let text = "";
+	var text = "";
 	// let first char to be letter
-	let charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	var charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 	text += charset.charAt(Math.floor(Math.random() * charset.length));
 
 	// other chars can be numbers
