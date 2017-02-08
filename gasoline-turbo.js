@@ -515,21 +515,19 @@ var getBlaze = function(input, cb) {
 
 				if(child.events) {
 					child.events.map(function(event) {
-						switch(event.type) {
-							case "event": {
-								var handler = eventHandlers.find(h => h.name == event.handler);
-								if(handler) {
-									handler.selectors = handler.selectors || [];
-								}
-								var evt = (event.event || "").toLowerCase();
-								if(evt.indexOf("on") == 0) {
-									evt = evt.slice(2);
-								}
-								var selector = evt + " " + child.selector;
-								if(handler.selectors.indexOf(selector) < 0) {
-									handler.selectors.push(selector);
-								}
-							}; break;
+						var handler = eventHandlers.find(h => h.name == event.handler);
+						if(handler) {
+							handler.selectors = handler.selectors || [];
+
+							var evt = (event.event || "").toLowerCase();
+							if(evt.indexOf("on") == 0) {
+								evt = evt.slice(2);
+							}
+
+							var selector = evt + " " + child.selector;
+							if(handler.selectors.indexOf(selector) < 0) {
+								handler.selectors.push(selector);
+							}
 						}
 					});
 				}
@@ -626,6 +624,7 @@ var getBlaze = function(input, cb) {
 			return;
 		}
 
+		eventHandlers = [];
 		if(template.handlers) {
 			eventHandlers = JSON.parse(JSON.stringify(template.handlers));
 		}
