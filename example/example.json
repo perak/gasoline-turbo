@@ -32,17 +32,29 @@
             },
             {
                "type": "condition",
-               "condition": "Meteor.user()",
-               "true": [
+               "condition": "currentUser",
+
+               "children": [
                   {
-                     "type": "text",
-                     "text": "You are logged in!"
-                  }
-               ],
-               "false": [
+                     "type": "condition-true",
+
+                     "children": [
+                        {
+                           "type": "text",
+                           "text": "You are logged in!"
+                        }
+                     ]
+                  },
+
                   {
-                     "type": "text",
-                     "text": "You are not logged in!"
+                     "type": "condition-false",
+
+                     "children": [
+                        {
+                           "type": "text",
+                           "text": "You are not logged in!"
+                        }
+                     ]
                   }
                ]
             }

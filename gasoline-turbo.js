@@ -387,10 +387,10 @@ var findSelectedObject = function(input) {
 };
 
 var acceptChildren = function(object) {
-	return !(object.type == "text" || (object.type == "html" && voidElements.indexOf(object.name) >= 0));
+	return !(object.type == "text" || object.type == "condition" || (object.type == "html" && voidElements.indexOf(object.name) >= 0));
 };
 
-var addObject = function(input, parentId, object) {
+var addObject = function(input, parentId, object) {	
 	var parent = findObject(input, parentId);
 	if(!parent) {
 		return;
@@ -406,6 +406,28 @@ var addObject = function(input, parentId, object) {
 	}
 
 	var newObject = JSON.parse(JSON.stringify(object));
+
+	if(newObject.type == "condition") {
+		if(!newObject.children) {
+			newObject.children = [];
+		}
+
+		if(!newObject.children.find(c => c.type == "condition-true")) {
+			var trueNode = {
+				type: "condition-true",
+				children: []
+			};
+			newObject.children.push(trueNode);
+		}
+
+		if(!newObject.children.find(c => c.type == "condition-false")) {
+			var falseNode = {
+				type: "condition-false",
+				children: []
+			};
+			newObject.children.push(falseNode);
+		}
+	}
 
 	addId(newObject, true);
 
@@ -471,8 +493,8 @@ var getBlaze = function(input, cb) {
 				if(!isVoid) {
 
 					if(child.children) {
-						child.children.map(function(child) {
-							addChild(child, depth + 1, context);
+						child.children.map(function(ch) {
+							addChild(ch, depth + 1, context);
 						});					
 					}
 
@@ -511,8 +533,8 @@ var getBlaze = function(input, cb) {
 				html += "{{#each " + child.dataset + "}}\n";
 
 				if(child.children) {
-					child.children.map(function(child) {
-						addChild(child, depth + 1, child.dataset);
+					child.children.map(function(ch) {
+						addChild(ch, depth + 1, child.dataset);
 					});					
 				}
 
@@ -527,18 +549,25 @@ var getBlaze = function(input, cb) {
 				html += getTabs(depth);
 				html += "{{#if " + child.condition + "}}\n";
 
-				if(child.true) {
-					child.true.map(function(child) {
-						addChild(child, depth + 1, context);
+				var trueNode = null;
+				var falseNode = null;
+				if(child.children) {
+					trueNode = child.children.find(c => c.type == "condition-true");
+					falseNode = child.children.find(c => c.type == "condition-false");
+				}
+
+				if(trueNode && trueNode.children) {
+					trueNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
 					});
 				}
 
-				if(child.false && child.false.length) {
+				if(falseNode && falseNode.children) {
 					html += getTabs(depth);
 					html += "{{else}}\n";
 
-					child.false.map(function(child) {
-						addChild(child, depth + 1, context);
+					falseNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
 					});
 				}
 
@@ -826,8 +855,8 @@ var getReact = function(input, cb) {
 
 				if(!isVoid) {
 					if(child.children) {
-						child.children.map(function(child) {
-							addChild(child, depth + 1, context);
+						child.children.map(function(ch) {
+							addChild(ch, depth + 1, context);
 						});					
 					}
 
@@ -849,8 +878,8 @@ var getReact = function(input, cb) {
 				jsx += child.dataset + ".map(function(item) {\n";
 
 				if(child.children) {
-					child.children.map(function(child) {
-						addChild(child, depth + 2, "item");
+					child.children.map(function(ch) {
+						addChild(ch, depth + 2, "item");
 					});					
 				}
 
@@ -1014,8 +1043,8 @@ var getHTML = function(input, cb) {
 				if(!isVoid) {
 
 					if(child.children) {
-						child.children.map(function(child) {
-							addChild(child, depth + 1, context);
+						child.children.map(function(ch) {
+							addChild(ch, depth + 1, context);
 						});					
 					}
 
@@ -1031,9 +1060,9 @@ var getHTML = function(input, cb) {
 				html += getTabs(depth);
 				html += "<div data-type=\"" + child.type + "\" data-source=\"" + child.dataset + "\">\n";
 				if(child.children) {
-					child.children.map(function(child) {
-						addChild(child, depth + 1, child.dataset);
-					});					
+					child.children.map(function(ch) {
+						addChild(ch, depth + 1, child.dataset);
+					});
 				}
 				html += getTabs(depth);
 				html += "</div>\n";
@@ -1046,24 +1075,29 @@ var getHTML = function(input, cb) {
 				html += getTabs(depth);
 				html += "<div data-type=\"" + child.type + "\" data-condition=\"" + child.condition + "\">\n";
 
-				if(child.true) {
+				var trueNode = null;
+				var falseNode = null;
+				if(child.children) {
+					trueNode = child.children.find(c => c.type == "condition-true");
+					falseNode = child.children.find(c => c.type == "condition-false");
+				}
+
+				if(trueNode && trueNode.children) {
 					html += getTabs(depth + 1);
 					html += "<div data-type=\"" + child.type + "-true\">\n";
-
-					child.true.map(function(child) {
-						addChild(child, depth + 2, context);
+					trueNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
 					});
-
 					html += getTabs(depth + 1);
 					html += "</div>\n";
 				}
 
-				if(child.false) {
+				if(falseNode && falseNode.children) {
 					html += getTabs(depth + 1);
 					html += "<div data-type=\"" + child.type + "-false\">\n";
 
-					child.false.map(function(child) {
-						addChild(child, depth + 2, context);
+					falseNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
 					});
 
 					html += getTabs(depth + 1);
@@ -1161,8 +1195,18 @@ var getWireframe = function(input, cb) {
 			if(node.selected) {
 				containerClass += " gasoline-turbo-selected";
 			}
+
+			var draggable = true;
+			if(node.type == "condition-true" || node.type == "condition-false") {
+				containerClass += " gasoline-fixed";
+				draggable = false;
+			}
 			html += getTabs(depth);
-			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\" draggable=\"true\">\n";
+			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\"";
+			if(draggable) {
+				html += " draggable=\"true\"";
+			}
+			html += ">\n";
 
 			html += getTabs(depth);
 			html += "<" + node.name;
@@ -1257,37 +1301,25 @@ var getWireframe = function(input, cb) {
 			// ---
 			case "condition": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "div";
+				node.name = "span";
+				addNode(node, child.type);
+			}; break;
 
-				var trueNode = {
-					_id: randomString(),
-					type: "html",
-					name: "div",
-					attributes: [
-						{ name: "class", value: "gasoline-turbo gas-condition-true" }
-					],
-					children: []
-				};
-				if(node.true) {
-					trueNode.children = JSON.parse(JSON.stringify(node.true));
-				}
+			// ---
+			// Condition - true
+			// ---
+			case "condition-true": {
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "span";
+				addNode(node, child.type);
+			}; break;
 
-				var falseNode = {
-					_id: randomString(),
-					type: "html",
-					name: "div",
-					attributes: [
-						{ name: "class", value: "gasoline-turbo gas-condition-false" }
-					],
-					children: []
-				};
-				if(node.false) {
-					falseNode.children = JSON.parse(JSON.stringify(node.false));
-				}
-
-				node.children = [];
-				node.children.push(trueNode);
-				node.children.push(falseNode);
+			// ---
+			// Condition - true
+			// ---
+			case "condition-false": {
+				var node = JSON.parse(JSON.stringify(child));
+				node.name = "span";
 				addNode(node, child.type);
 			}; break;
 

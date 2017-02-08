@@ -432,43 +432,61 @@ JSX
 Condition
 ---------
 
-Conditional rendering. If expression evals true render one content else render another content. Each object's `children` array can contain condition node.
+Conditional rendering. If expression evals true render one content else render another content. `children` array can contain only two objects: one of type "conditon-true" and another of type "condition-false". If condition evals true, content of `condition-true` will be rendered, otherwise content of `condition-false` will be rendered.
 
 ```js
 {
-   "type": "condition",
-   "condition": "Meteor.user()",
+	"type": "condition",
+	"condition": "Meteor.user()",
 
-   "true": [
+	"children": [
+		{
+			"type": "condition-true",
 
-   ],
-   "false": [
+			"children": [
+			]
+		},
 
-   ]
+		{
+			"type": "condition-false",
+
+			"children": [
+			]
+		}
+	]
 }
 ```
-
-Property `true` is array of children which will be rendered if condition evals `true`.
-Property `false` is array of children which will be rendered if condition evals `false`.
 
 Example input:
 
 ```js
 {
-   "type": "condition",
-   "condition": "currentUser",
-   "true": [
-      {
-         "type": "text",
-         "text": "You are logged in!"
-      }
-   ],
-   "false": [
-      {
-         "type": "text",
-         "text": "You are not logged in!"
-      }
-   ]
+	"type": "condition",
+	"condition": "currentUser",
+
+	"children": [
+		{
+			"type": "condition-true",
+
+			"children": [
+				{
+					"type": "text",
+					"text": "You are logged in!"
+				}
+			]
+		},
+
+		{
+			"type": "condition-false",
+
+			"children": [
+				{
+					"type": "text",
+					"text": "You are not logged in!"
+				}
+			]
+		}
+	]
 }
 ```
 
