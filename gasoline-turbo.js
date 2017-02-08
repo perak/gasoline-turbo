@@ -356,6 +356,16 @@ var findParentObject = function(input, objectId) {
 	return null;
 };
 
+var findParentOfType = function(input, objectId, parentType) {
+	var parent = null;
+	do {
+		parent = findParentObject(input, parent ? parent._id : objectId);
+	} while(parent && parent.type != parentType);
+
+	return parent && parent.type == parentType ? parent : null;
+};
+
+
 var findSelectedObject = function(input) {
 	if(input.selected) {
 		return input;
@@ -1215,19 +1225,13 @@ var getWireframe = function(input, cb) {
 				node.attributes = [];
 			}
 
-			var preserveAttrs = [
-				"type",
-				"class"
-			];
-
 			var newAttributes = [];
 			newAttributes.push({ name: "data-id", value: node._id });
+				node.attributes.map(function(a) {
+					if(a) {
+						newAttributes.push(a);
 
-			preserveAttrs.map(function(a) {
-				var attr = node.attributes.find(function(x) { return x.name == a; });
-				if(attr) {
-					newAttributes.push(attr);
-				}
+					}
 			});
 
 			var gasClass = "gas-element";
@@ -1412,6 +1416,7 @@ if(typeof module != "undefined" && module.exports) {
 
 	exports.findObject = findObject;
 	exports.findParentObject = findParentObject;
+	exports.findParentOfType = findParentOfType;
 
 	exports.findSelectedObject = findSelectedObject;
 	exports.selectObject = selectObject;
@@ -1427,5 +1432,7 @@ if(typeof module != "undefined" && module.exports) {
 	exports.getHTML = getHTML;
 
 	exports.getWireframe = getWireframe;
+
+	exports.reactEvents = reactEvents;
 
 }

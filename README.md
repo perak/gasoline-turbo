@@ -3,7 +3,7 @@ Gasoline Turbo
 
 **Generic Template** (but "Gasoline Turbo" smells better)
 
-Generates Blaze, React and Angular template from the same input.
+**Generates Blaze, React and Angular template from the same input.**
 
 It works both as a command line tool or you can add it as any other npm module to your node.js and/or Meteor application. Works client-side in the browser too.
 
@@ -437,7 +437,7 @@ Conditional rendering. If expression evals true render one content else render a
 ```js
 {
 	"type": "condition",
-	"condition": "Meteor.user()",
+	"condition": "currentUser",
 
 	"children": [
 		{
@@ -542,6 +542,17 @@ Searches `input` for object which `_id` equals `objectId` argument and returns t
 ##findParentObject(input, objectId)
 
 Function returns object's parent.
+
+
+##findParentOfType(input, objectId, parentType)
+
+Function searches the tree upwards starting from object's direct parent and returns first element that matches given type.
+
+Example:
+
+```
+var template = findParentOfType(input, obj._id, "template");
+```
 
 
 ##selectObject(input, objectId)
