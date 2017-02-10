@@ -262,6 +262,24 @@ var addId = function(input, force) {
 	}
 };
 
+var removeId = function(input) {
+	if(input._id) {
+		delete input._id;
+	}
+
+	if(input.templates) {
+		input.templates.map(function(template) {
+			removeId(template);
+		});
+	}
+
+	if(input.children) {
+		input.children.map(function(child) {
+			removeId(child);
+		});
+	}
+};
+
 var selectObject = function(input, objectId) {
 	if(input._id && input._id == objectId) {
 		input.selected = true;
@@ -700,7 +718,8 @@ var getBlaze = function(input, cb) {
 					helpers += ",\n\n";
 				}
 
-				helpers += "\t" + helper.name + ": function(" + helper.arguments.join(", ") + ") {\n";
+				var helperArgs = helper.arguments || [];
+				helpers += "\t" + helper.name + ": function(" + helperArgs.join(", ") + ") {\n";
 				helpers += identMultilineString(helper.code, 2) + "\n";
 				helpers += "\t}";
 			});
@@ -1412,6 +1431,7 @@ var getWireframe = function(input, cb) {
 if(typeof module != "undefined" && module.exports) {
 	exports.randomString = randomString;
 	exports.addId = addId;
+	exports.removeId = removeId;
 
 	exports.findObject = findObject;
 	exports.findParentObject = findParentObject;

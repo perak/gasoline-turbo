@@ -534,6 +534,11 @@ Simply returns unique random string. (e.g. `XlE1N31VZA7iGLG43M`)
 Fuction iterates through entire `input` tree and sets each object's `_id` member to random string. If argument `force` is set to `true` then function sets `_id` even if object already have `_id` set (overwrites _id with new unique random value).  
 
 
+##removeId(input)
+
+Fuction iterates through entire `input` tree and removes each object's `_id` member.
+
+
 ##findObject(input, objectId)
 
 Searches `input` for object which `_id` equals `objectId` argument and returns that object. If object is not found then function returns `null`.
