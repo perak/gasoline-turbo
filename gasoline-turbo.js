@@ -415,7 +415,7 @@ var findSelectedObject = function(input) {
 };
 
 var acceptChildren = function(object) {
-	return !(object.type == "text" || object.type == "condition" || (object.type == "html" && voidElements.indexOf(object.name) >= 0));
+	return !(object.type == "text" || object.type == "condition" || (object.type == "html" && voidElements.indexOf(object.element) >= 0));
 };
 
 var addObject = function(input, parentId, object) {	
@@ -502,10 +502,10 @@ var getBlaze = function(input, cb) {
 			// HTML node
 			// ---
 			case "html": {
-				var isVoid = voidElements.indexOf(child.name) >= 0;
+				var isVoid = voidElements.indexOf(child.element) >= 0;
 
 				html += getTabs(depth);
-				html += "<" + child.name;
+				html += "<" + child.element;
 
 				if(child.attributes) {
 					child.attributes.map(function(attribute) {
@@ -527,7 +527,7 @@ var getBlaze = function(input, cb) {
 					}
 
 					html += getTabs(depth);
-					html += "</" + child.name + ">\n";
+					html += "</" + child.element + ">\n";
 				}
 
 
@@ -617,7 +617,7 @@ var getBlaze = function(input, cb) {
 			case "inclusion": {
 
 				html += getTabs(depth);
-				html += "{{> " + child.name + "}}";
+				html += "{{> " + child.template + "}}";
 				html += "\n";
 
 			}; break;
@@ -850,10 +850,10 @@ var getReact = function(input, cb) {
 			// HTML node
 			// ---
 			case "html": {
-				var isVoid = voidElements.indexOf(child.name) >= 0;
+				var isVoid = voidElements.indexOf(child.element) >= 0;
 
 				jsx += getTabs(depth);
-				jsx += "<" + child.name;
+				jsx += "<" + child.element;
 
 				if(child.attributes) {
 					child.attributes.map(function(attribute) {
@@ -889,7 +889,7 @@ var getReact = function(input, cb) {
 					}
 
 					jsx += getTabs(depth);
-					jsx += "</" + child.name + ">\n";
+					jsx += "</" + child.element + ">\n";
 				}
 			}; break;
 
@@ -942,7 +942,7 @@ var getReact = function(input, cb) {
 			case "inclusion": {
 
 				jsx += getTabs(depth);
-				jsx += "<" + child.name + " />";
+				jsx += "<" + child.template + " />";
 				jsx += "\n";
 
 			}; break;
@@ -1052,10 +1052,10 @@ var getHTML = function(input, cb) {
 			// HTML node
 			// ---
 			case "html": {
-				var isVoid = voidElements.indexOf(child.name) >= 0;
+				var isVoid = voidElements.indexOf(child.element) >= 0;
 
 				html += getTabs(depth);
-				html += "<" + child.name;
+				html += "<" + child.element;
 
 				if(child.attributes) {
 					child.attributes.map(function(attribute) {
@@ -1077,7 +1077,7 @@ var getHTML = function(input, cb) {
 					}
 
 					html += getTabs(depth);
-					html += "</" + child.name + ">\n";
+					html += "</" + child.element + ">\n";
 				}
 			}; break;
 
@@ -1211,11 +1211,11 @@ var getWireframe = function(input, cb) {
 
 	var addChild = function(child, depth, context) {
 		var addNode = function(node, type, text) {
-			var isVoid = voidElements.indexOf(node.name) >= 0;
-			var isInline = inlineElements.indexOf(node.name) >= 0;
+			var isVoid = voidElements.indexOf(node.element) >= 0;
+			var isInline = inlineElements.indexOf(node.element) >= 0;
 
 			var containerElement = "div";
-			if(isInline && node.name != "input") {
+			if(isInline && node.element != "input") {
 				containerElement = "span";
 			}
 
@@ -1237,7 +1237,7 @@ var getWireframe = function(input, cb) {
 			html += ">\n";
 
 			html += getTabs(depth);
-			html += "<" + node.name;
+			html += "<" + node.element;
 
 			if(!node.attributes) {
 				node.attributes = [];
@@ -1291,7 +1291,7 @@ var getWireframe = function(input, cb) {
 				}
 
 				html += getTabs(depth);
-				html += "</" + node.name + ">\n";
+				html += "</" + node.element + ">\n";
 			}
 
 			// close container element
@@ -1314,7 +1314,7 @@ var getWireframe = function(input, cb) {
 			// ---
 			case "loop": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "div";
+				node.element = "div";
 				addNode(node, child.type);
 			}; break;
 
@@ -1323,7 +1323,7 @@ var getWireframe = function(input, cb) {
 			// ---
 			case "condition": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "span";
+				node.element = "span";
 				addNode(node, child.type);
 			}; break;
 
@@ -1332,7 +1332,7 @@ var getWireframe = function(input, cb) {
 			// ---
 			case "condition-true": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "span";
+				node.element = "span";
 				addNode(node, child.type);
 			}; break;
 
@@ -1341,7 +1341,7 @@ var getWireframe = function(input, cb) {
 			// ---
 			case "condition-false": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "span";
+				node.element = "span";
 				addNode(node, child.type);
 			}; break;
 
@@ -1351,7 +1351,7 @@ var getWireframe = function(input, cb) {
 			case "text": {
 
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "span";
+				node.element = "span";
 				addNode(node, child.type, child.text);
 
 			}; break;
@@ -1362,8 +1362,8 @@ var getWireframe = function(input, cb) {
 			case "inclusion": {
 
 				var node = JSON.parse(JSON.stringify(child));
-				node.name = "span";
-				addNode(node, child.type, "{{> " + child.name + "}}");
+				node.element = "span";
+				addNode(node, child.type, "{{> " + child.template + "}}");
 			}; break;
 		}
 	};

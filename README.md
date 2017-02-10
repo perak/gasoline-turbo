@@ -226,7 +226,7 @@ Each object's `children` array can contain html node description like this:
 ```js
 {
    "type": "html",
-   "name": "div",
+   "element": "div",
    "attributes": [
       {
          "name": "class",
@@ -275,7 +275,7 @@ Example div with text:
 ```js
 {
    "type": "html",
-   "name": "div",
+   "element": "div",
    "attributes": [
       {
          "name": "class",
@@ -315,7 +315,7 @@ Event handler is defined in element's parent "template" object, and can be attac
 			children: [
 				{
 					type: "html",
-					name: "button",
+					element: "button",
 					selector: ".nice-button",
 
 					attributes: [

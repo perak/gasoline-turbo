@@ -6,7 +6,7 @@
          "children": [
             {
                "type": "html",
-               "name": "div",
+               "element": "div",
                "attributes": [
                   {
                      "name": "class",
@@ -26,7 +26,7 @@
                "children": [
                   {
                      "type": "inclusion",
-                     "name": "CustomersItem"
+                     "template": "CustomersItem"
                   }
                ]
             },
@@ -66,7 +66,7 @@
          "children": [
             {
                "type": "html",
-               "name": "div",
+               "element": "div",
                "selector": ".customers-item",
                "attributes": [
                   {
@@ -81,7 +81,7 @@
                   },
                   {
                      "type": "html",
-                     "name": "input",
+                     "element": "input",
                      "attributes": [
                         {
                            "name": "type",
