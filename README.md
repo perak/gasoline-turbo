@@ -14,10 +14,18 @@ Project status
 Under development - just started.
 
 
-Visual UI
-=========
+Example apps
+============
 
-Example application using this package (Gasoline Visual UI) you can see here: [https://gasoline-turbo.meteorfarm.com](https://gasoline-turbo.meteorfarm.com)
+
+### Gasoline Visual UI
+
+- Minimal example application using this package is here: [https://gasoline-turbo.meteorfarm.com](https://gasoline-turbo.meteorfarm.com).
+
+### Meteor Kitchen
+
+- <a href="https://www.meteorkitchen.com" target="_blank">Meteor Kitchen UI</a> will use gasoline soon. See <a href="https://www.youtube.com/watch?v=8Gr2oioZDG8" target="_blank">Preview video at Youtube</a>.
+
 
 Usage
 =====
@@ -642,23 +650,16 @@ getHTML(input, function(err, html) {
 });
 ```
 
-##getWireframe(input, callback)
+##getWireframe(input, templateName)
 
-Function returns static HTML which can be used by [visual UI](#visual-ui).
+Function returns static HTML which can be used by [visual UI](#example-apps).
 
 Each element is encapsulated into `<div class="gasoline-turbo" data-id="OBJECT ID"> ... </div>` or `<span class="gasoline-turbo" data-id="OBJECT ID"> ... </span>` ("div" or "span" - depending on is element inline or block-level entity).
 
 Example:
 
 ```js
-getWireframe(input, function(err, html) {
-	if(err) {
-		alert(err);
-		return;
-	}
-
-	console.log(html);
-});
+var wireframe = getWireframe(input, "homePage");
 ```
 
 ---

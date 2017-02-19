@@ -864,7 +864,11 @@ var getReact = function(input, cb) {
 
 						if(attribute.value) {
 							var valConverted = blazeHelperCallsToReact(attribute.value, context);
-							jsx += "=\"" + valConverted + "\"";
+							if(valConverted && valConverted[0] == "{") {
+								jsx += "=" + valConverted;
+							} else {
+								jsx += "=\"" + valConverted + "\"";
+							}
 						}
 					});
 				}
@@ -903,12 +907,20 @@ var getReact = function(input, cb) {
 
 
 				jsx += getTabs(depth + 1);
-				jsx += child.dataset + ".map(function(item) {\n";
+				jsx += child.dataset + ".map(function(item, itemIndex) {\n";
 
 				if(child.children) {
+					jsx += getTabs(depth + 2);
+					jsx += "return (\n";
 					child.children.map(function(ch) {
-						addChild(ch, depth + 2, "item");
+						if(ch.type == "html") {
+							ch.attributes = ch.attributes || [];
+							ch.attributes.push({ name: "key", value: "{itemIndex}" });
+						}
+						addChild(ch, depth + 3, "item");
 					});					
+					jsx += getTabs(depth + 2);
+					jsx += ");\n";
 				}
 
 				jsx += getTabs(depth + 1);
@@ -923,6 +935,41 @@ var getReact = function(input, cb) {
 			// Condition
 			// ---
 			case "condition": {
+
+				jsx += getTabs(depth);
+
+// !!! extract and pass arguments instead simply "()"
+				jsx += "{this." + child.condition + "() ? (\n";
+
+				var trueNode = null;
+				var falseNode = null;
+				if(child.children) {
+					trueNode = child.children.find(c => c.type == "condition-true");
+					falseNode = child.children.find(c => c.type == "condition-false");
+				}
+
+				if(trueNode && trueNode.children) {
+					trueNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
+					});
+				} else {
+					jsx += getTabs(depth + 1);
+					jsx += "null\n";
+				}
+				jsx += getTabs(depth);
+				jsx += ") : (\n";
+
+				if(falseNode && falseNode.children) {
+					falseNode.children.map(function(ch) {
+						addChild(ch, depth + 1, context);
+					});
+				} else {
+					jsx += getTabs(depth + 1);
+					jsx += "null\n";
+				}
+
+				jsx += getTabs(depth);
+				jsx += ")}\n";
 			}; break;
 
 			// ---
@@ -1008,9 +1055,17 @@ var getReact = function(input, cb) {
 		jsx += "\t\treturn (\n";
 
 		if(template.children) {
+			if(template.children.length > 1) {
+				jsx += "\n\t\t<div>\n";
+			}
+
 			template.children.map(function(child) {
 				addChild(child, 3, "this");
 			});
+
+			if(template.children.length > 1) {
+				jsx += "\n\t\t</div>\n";
+			}
 		} else {
 			jsx += "\t\t\t<div></div>\n";
 		}
@@ -1204,10 +1259,8 @@ var getHTML = function(input, cb) {
 // HTML for Visual Designer
 // ========================
 
-var getWireframe = function(input, cb) {
+var getWireframe = function(input, templateName) {
 	var html = "";
-
-	addId(input);
 
 	var addChild = function(child, depth, context) {
 		var addNode = function(node, type, text) {
@@ -1369,64 +1422,61 @@ var getWireframe = function(input, cb) {
 	};
 
 	if(!input.templates) {
-		cb(new Error("Error: no templates found.", html, js));
-		return;
+		return "";
 	}
+
+	var template = input.templates.find(x => x.name == templateName);
+	if(!template) {
+		return "";
+	}
+
+	addId(template);
 
 	var error = false;
 
-	var output = [];
-
-	input.templates.map(function(template) {
-		if(template.type != "template") {
-			error = true;
-			cb(new Error("Error: unknown template type: \"" + template.type + "\"", html, js));
-			return;
-		}
-		if(!template.name) {
-			error = true;
-			cb(new Error("Error: invalid template name \"" + template.name + "\"", html, js));
-			return;
-		}
-
-		// ====
-		// HTML
-		// ====
-
-		if(html) {
-			html += "\n";
-		}
-
-		var templateClass = "gasoline-turbo gas-template";
-		if(template.selected) {
-			templateClass += " gasoline-turbo-selected";
-		}
-
-		html += "<div class=\""+ templateClass + "\" data-id=\"" + template._id + "\">\n";
-
-		if(template.children && template.children.length) {
-			template.children.map(function(child) {
-				addChild(child, 1, "this");
-			});
-		} else {
-			html += "&nbsp;"
-		}
-
-		html += "</div>\n";
-		html += "\n";
-
-		output.push({
-			html: html
-		});
-	});
-
-	if(!error) {
-		cb(null, output);
+	if(template.type != "template") {
+		error = true;
+		cb(new Error("Error: unknown template type: \"" + template.type + "\"", html, js));
+		return;
 	}
+	if(!template.name) {
+		error = true;
+		cb(new Error("Error: invalid template name \"" + template.name + "\"", html, js));
+		return;
+	}
+
+	// ====
+	// HTML
+	// ====
+
+	if(html) {
+		html += "\n";
+	}
+
+	var templateClass = "gasoline-turbo gas-template";
+	if(template.selected) {
+		templateClass += " gasoline-turbo-selected";
+	}
+
+	html += "<div class=\""+ templateClass + "\" data-id=\"" + template._id + "\">\n";
+
+	if(template.children && template.children.length) {
+		template.children.map(function(child) {
+			addChild(child, 1, "this");
+		});
+	} else {
+		html += "&nbsp;"
+	}
+
+	html += "</div>\n";
+	html += "\n";
+
+	return html;
 };
 
 
 // ===
+
 
 if(typeof module != "undefined" && module.exports) {
 	exports.randomString = randomString;
