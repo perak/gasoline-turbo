@@ -332,6 +332,85 @@ var findObject = function(input, objectId) {
 	return null;
 };
 
+var objectGotClass = function(obj, className) {
+	if(!obj || !obj.attributes || !className) {
+		return false;
+	}
+
+	var classAttr = obj.attributes.find(function(attr) {
+		return attr.name == "class";
+	});
+
+	if(!classAttr || !classAttr.value) {
+		return false;
+	}
+
+	var classes = classAttr.value.split(" ");
+	for(var i = 0; i < classes.length; i++) {
+		classes[i] = classes[i].trim().toLowerCase();
+	}
+
+	return classes.indexOf(className) >= 0;
+};
+
+var getObjectIdAttribute = function(obj) {
+	if(!obj || !obj.attributes) {
+		return "";
+	}
+
+	var idAttr = obj.attributes.find(function(attr) {
+		return attr.name == "id";
+	});
+
+	if(!idAttr || !idAttr.value) {
+		return "";
+	}
+
+	return idAttr.value;
+};
+
+var _findObjectsBySelector = function(input, selector, list) {
+	if(!selector) {
+		return;
+	}
+
+	if(selector[0] == ".") {
+		var className = selector.substring(1);
+		if(objectGotClass(input, className)) {
+			list.push(input);
+		}
+	} else {
+		if(selector[0] == "#") {
+			var id = selector.substring(1);
+			if(getObjectIdAttribute(input) == id) {
+				list.push(input);
+			}
+		} else {
+			if(input.element && input.element == selector) {
+				list.push(input);
+			}
+		}
+	}
+
+	if(input.templates) {
+		input.templates.map(function(template) {
+			_findObjectsBySelector(template, selector, list);
+		});
+	}
+
+	if(input.children) {
+		input.children.map(function(child) {
+			_findObjectsBySelector(child, selector, list);
+		});
+	}
+};
+
+var findObjectsBySelector = function(input, selector) {
+	var list = [];
+	_findObjectsBySelector(input, selector, list);
+	return list;
+};
+
 var findParentObject = function(input, objectId) {
 	if(input.templates) {
 		if(!!input.templates.find(function(template) {
@@ -1548,6 +1627,7 @@ if(typeof module != "undefined" && module.exports) {
 	exports.removeId = removeId;
 
 	exports.findObject = findObject;
+	exports.findObjectsBySelector = findObjectsBySelector;
 	exports.findParentObject = findParentObject;
 	exports.findParentOfType = findParentOfType;
 
