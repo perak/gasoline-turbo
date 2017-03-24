@@ -240,6 +240,7 @@ Helpers
 
 Helper functions are defined in template object and can be used inside any element (as text or attribute name/value) 
 
+```js
 {
 	templates: [
 		{
@@ -276,6 +277,7 @@ Helper functions are defined in template object and can be used inside any eleme
 		}
 	]
 }
+```
 
 Events
 ------
