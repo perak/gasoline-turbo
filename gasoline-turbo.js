@@ -240,7 +240,7 @@ var escapeRegEx = function (string) {
 	return string.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
 }
 
-var replaceSubstrings = function(string, find, replace) {
+var replaceSubstr = function(string, find, replace) {
 	return string.replace(new RegExp(escapeRegEx(find), 'g'), replace);
 };
 
@@ -496,6 +496,12 @@ var getBlaze = function(input, cb) {
 	var js = "";
 	var eventHandlers = [];
 
+	var replaceSpecialVars = function(s) {
+		var result = s + "";
+//		result = replaceSubstr(result, "LOCAL_STATE", "???");
+		return result;
+	};
+
 	var addChild = function(child, depth, context) {
 		switch(child.type) {
 			// ---
@@ -542,7 +548,34 @@ var getBlaze = function(input, cb) {
 								evt = evt.slice(2);
 							}
 
-							var selector = evt + " " + child.selector;
+							var childSelector = child.selector;
+
+							if(!childSelector) {
+								// No selector. Try element id...
+								if(child.attributes) {
+									var idAttr = child.attributes.find(attr => attr.name == "id");
+									if(idAttr && idAttr.value) {
+										childSelector = "#" + idAttr.value;
+									}
+								}
+							}
+
+							if(!childSelector) {
+								// No selector. Try element class...
+								if(child.attributes) {
+									var classAttr = child.attributes.find(attr => attr.name == "class");
+									if(classAttr && classAttr.value) {
+										childSelector = ("." + classAttr.value + "").split(" ").join(".");
+									}
+								}
+							}
+
+							if(!childSelector) {
+								// No selector. Use element name
+								childSelector = child.element;
+							}
+
+							var selector = evt + " " + childSelector;
 							if(handler.selectors.indexOf(selector) < 0) {
 								handler.selectors.push(selector);
 							}
@@ -695,7 +728,8 @@ var getBlaze = function(input, cb) {
 				});
 
 				events += "\t\"" + selectors + "\": function(e, t) {\n";
-				events += identMultilineString(handler.code, 2) + "\n";
+				var handlerCode = replaceSpecialVars(handler.code);
+				events += identMultilineString(handlerCode, 2) + "\n";
 				events += "\t}";
 			}
 		});
@@ -720,7 +754,9 @@ var getBlaze = function(input, cb) {
 
 				var helperArgs = helper.arguments || [];
 				helpers += "\t" + helper.name + ": function(" + helperArgs.join(", ") + ") {\n";
-				helpers += identMultilineString(helper.code, 2) + "\n";
+
+				var helperCode = replaceSpecialVars(helper.code);
+				helpers += identMultilineString(helperCode, 2) + "\n";
 				helpers += "\t}";
 			});
 		}
@@ -743,6 +779,12 @@ var getBlaze = function(input, cb) {
 
 var getReact = function(input, cb) {
 	var jsx = "";
+
+	var replaceSpecialVars = function(s) {
+		var result = s + "";
+//		result = replaceSubstr(result, "LOCAL_STATE", "????");
+		return result;
+	};
 
 	var blazeHelperCallToReact = function(helper, context) {
 		if(helper.length < 4) {
@@ -839,7 +881,7 @@ var getReact = function(input, cb) {
 		var helpers = extractBlazeHelpers(str);
 		helpers.map(function(helper) {
 			var converted = blazeHelperCallToReact(helper, context);
-			out = replaceSubstrings(out, helper, converted);
+			out = replaceSubstr(out, helper, converted);
 		});
 		return out;
 	};
@@ -919,6 +961,15 @@ var getReact = function(input, cb) {
 						}
 						addChild(ch, depth + 3, "item");
 					});					
+					jsx += getTabs(depth + 2);
+					jsx += ");\n";
+				} else {
+					jsx += getTabs(depth + 2);
+					jsx += "return (\n";
+
+					jsx += getTabs(depth + 3);
+					jsx += "<div></div>\n";
+
 					jsx += getTabs(depth + 2);
 					jsx += ");\n";
 				}
@@ -1036,7 +1087,8 @@ var getReact = function(input, cb) {
 					jsx += argStr;
 				}
 				jsx += ") {\n";
-				jsx += identMultilineString(helper.code, 2);
+				var helperCode = replaceSpecialVars(helper.code);
+				jsx += identMultilineString(helperCode, 2);
 				jsx += "\n\t},\n";
 			});
 		}
@@ -1045,7 +1097,8 @@ var getReact = function(input, cb) {
 		if(template.handlers) {
 			template.handlers.map(function(handler) {
 				jsx += "\n\t" + handler.name + "(e) {\n";
-				jsx += identMultilineString(handler.code, 2);
+				var handlerCode = replaceSpecialVars(handler.code);
+				jsx += identMultilineString(handlerCode, 2);
 				jsx += "\n\t},\n";
 			});
 		}
@@ -1056,15 +1109,15 @@ var getReact = function(input, cb) {
 
 		if(template.children) {
 			if(template.children.length > 1) {
-				jsx += "\n\t\t<div>\n";
-			}
-
-			template.children.map(function(child) {
-				addChild(child, 3, "this");
-			});
-
-			if(template.children.length > 1) {
-				jsx += "\n\t\t</div>\n";
+				jsx += "\t\t\t<div>\n";
+				template.children.map(function(child) {
+					addChild(child, 4, "this");
+				});
+				jsx += "\n\t\t\t</div>\n";
+			} else {
+				template.children.map(function(child) {
+					addChild(child, 3, "this");
+				});
 			}
 		} else {
 			jsx += "\t\t\t<div></div>\n";
@@ -1261,6 +1314,7 @@ var getHTML = function(input, cb) {
 
 var getWireframe = function(input, templateName) {
 	var html = "";
+	var containers = "";
 
 	var addChild = function(child, depth, context) {
 		var addNode = function(node, type, text) {
@@ -1268,10 +1322,6 @@ var getWireframe = function(input, templateName) {
 			var isInline = inlineElements.indexOf(node.element) >= 0;
 
 			var containerElement = "div";
-			if(isInline && node.element != "input") {
-				containerElement = "span";
-			}
-
 			var containerClass = "gasoline-turbo";
 			if(node.selected) {
 				containerClass += " gasoline-turbo-selected";
@@ -1282,12 +1332,13 @@ var getWireframe = function(input, templateName) {
 				containerClass += " gasoline-fixed";
 				draggable = false;
 			}
-			html += getTabs(depth);
-			html += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\"";
+			containers += "<" + containerElement + " class=\"" + containerClass + "\" data-id=\"" + node._id + "\"";
 			if(draggable) {
-				html += " draggable=\"true\"";
+				containers += " draggable=\"true\"";
 			}
-			html += ">\n";
+			containers += ">\n";
+
+
 
 			html += getTabs(depth);
 			html += "<" + node.element;
@@ -1348,8 +1399,9 @@ var getWireframe = function(input, templateName) {
 			}
 
 			// close container element
-			html += getTabs(depth);
-			html += "</" + containerElement + ">\n";
+			containers += getTabs(depth);
+			containers += "</" + containerElement + ">\n";
+
 		};
 
 
@@ -1368,6 +1420,7 @@ var getWireframe = function(input, templateName) {
 			case "loop": {
 				var node = JSON.parse(JSON.stringify(child));
 				node.element = "div";
+				node.attributes = [{ name: "class", value: "gas-control" }];
 				addNode(node, child.type);
 			}; break;
 
@@ -1376,7 +1429,8 @@ var getWireframe = function(input, templateName) {
 			// ---
 			case "condition": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.element = "span";
+				node.element = "div";
+				node.attributes = [{ name: "class", value: "gas-control" }];
 				addNode(node, child.type);
 			}; break;
 
@@ -1385,16 +1439,18 @@ var getWireframe = function(input, templateName) {
 			// ---
 			case "condition-true": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.element = "span";
+				node.element = "div";
+				node.attributes = [{ name: "class", value: "gas-control" }];
 				addNode(node, child.type);
 			}; break;
 
 			// ---
-			// Condition - true
+			// Condition - false
 			// ---
 			case "condition-false": {
 				var node = JSON.parse(JSON.stringify(child));
-				node.element = "span";
+				node.element = "div";
+				node.attributes = [{ name: "class", value: "gas-control" }];
 				addNode(node, child.type);
 			}; break;
 
@@ -1415,7 +1471,8 @@ var getWireframe = function(input, templateName) {
 			case "inclusion": {
 
 				var node = JSON.parse(JSON.stringify(child));
-				node.element = "span";
+				node.element = "div";
+				node.attributes = [{ name: "class", value: "gas-control" }];
 				addNode(node, child.type, "{{> " + child.template + "}}");
 			}; break;
 		}
@@ -1448,17 +1505,21 @@ var getWireframe = function(input, templateName) {
 	// ====
 	// HTML
 	// ====
-
 	if(html) {
 		html += "\n";
 	}
 
-	var templateClass = "gasoline-turbo gas-template";
+	var containerClass = "gasoline-turbo";
 	if(template.selected) {
-		templateClass += " gasoline-turbo-selected";
+		containerClass += " gasoline-turbo-selected";
 	}
 
-	html += "<div class=\""+ templateClass + "\" data-id=\"" + template._id + "\">\n";
+	containers += "<div class=\"" + containerClass + "\" data-id=\"" + template._id + "\">";
+
+
+	html += "<div class=\"gas-element gas-template\" data-id=\"" + template._id + "\">\n";
+
+
 
 	if(template.children && template.children.length) {
 		template.children.map(function(child) {
@@ -1469,11 +1530,14 @@ var getWireframe = function(input, templateName) {
 	}
 
 	html += "</div>\n";
+
+	containers += "</div>\n";
+
 	html += "\n";
+	html += containers;
 
 	return html;
 };
-
 
 // ===
 

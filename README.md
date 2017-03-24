@@ -77,7 +77,12 @@ Template object:
 	name: "HomePage",
 
 	children: [
+	],
 
+	handlers: [
+	],
+
+	helpers: [
 	]
 }
 ```
@@ -92,7 +97,12 @@ Template object:
 			name: "HomePage",
 
 			children: [
+			],
 
+			handlers: [
+			],
+
+			helpers: [
 			]
 		}
 
@@ -136,94 +146,11 @@ export const HomePage = React.createClass({
 
 **Angular 1**
 
-HTML
-```html
-<homePage>
-</homePage>
-```
-
-JS
-```js
-//----------------------------------------
-//
-
-//----------------------------------------
-'use strict';
-import angular from 'angular';
-import angularMeteor from 'angular-meteor';
-import uiRouter from 'angular-ui-router';
-
-import homePageTemplate from './homepage.html';
-
-const name = 'home';
-var that;
-
-class Home {
-  constructor($scope, $reactive) {
-    'ngInject';
-
-    $reactive(this).attach($scope);
-    console.log("Home constructor");
-    this.scopeName = name;  // Helps when digging through Angular scopes
-    that = this;
-
-// Subscriptions...
-//    this.subscribe('things', () => []);
-
-    this.user = Meteor.user();  // Get current user
-
-    this.helpers({
-//    	things: () => Things.find()
-    });
-
-  }; // End of constructor
-} // End of class
-
-// create a module
-export default angular.module(name, [
-  angularMeteor
-  ,uiRouter
-]).component(name, {
-  template: homePageTemplate,
-  controller: Home
-})
-  .config(config)
-  .run(run);
-
-function config($locationProvider, $urlRouterProvider, $stateProvider) {
-  'ngInject';
-
-  // console.log("Home.config()");
-}
-
-function run($rootScope, $state) {
-  'ngInject';
-
-};
-```
+(not implemented yet)
 
 **Angular 2**
 
-HTML
-```html
-<home-page>
-</home-page>
-```
-
-TS (Typescript)
-
-```ts
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'home-page',
-  templateUrl: './home.component.html',
-  styleUrls: ['./home.component.css']
-})
-export class HomeComponent {
-  title = 'Home page works!';
-}
-```
+(not implemented yet)
 
 
 HTML node
@@ -307,6 +234,48 @@ That will produce:
 	Hello World!
 </div>
 ```
+
+Helpers
+-------
+
+Helper functions are defined in template object and can be used inside any element (as text or attribute name/value) 
+
+{
+	templates: [
+		{
+			type: "template",
+			name: "HomePage",
+
+			children: [
+				{
+					type: "html",
+					element: "button",
+
+					attributes: [
+						name: "class",
+						value: "{{buttonClass}}"
+					],
+
+					children: [
+						{
+							type: "text",
+							text: "Click Me!"
+						}
+					]
+				}
+			],
+
+			helpers: [
+				{
+					type: "helper",
+					name: "buttonClass",
+					arguments: [],
+					code: "return \"btn btn-success\""
+				}
+			]
+		}
+	]
+}
 
 Events
 ------
