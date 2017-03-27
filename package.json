@@ -1,7 +1,7 @@
 {
   "name": "gasoline-turbo",
   "version": "0.1.9",
-  "description": "Generic Template - generates blaze, react and angular code from the same input",
+  "description": "Generic Template - generates Blaze, React and Angular code from the same json input",
   "main": "gasoline-turbo.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,7 +15,8 @@
     "blaze",
     "react",
     "angular",
-    "meteor"
+    "meteor",
+    "gasoline"
   ],
   "preferGlobal": "true",
   "bin": {
