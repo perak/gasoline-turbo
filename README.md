@@ -89,7 +89,9 @@ Template object:
 
 *Example:*
 
+
 ```js
+
 {
 	templates: [
 		{
@@ -108,6 +110,7 @@ Template object:
 
 	]
 }
+
 ```
 
 This input will produce:
