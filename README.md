@@ -87,11 +87,9 @@ Template object:
 }
 ```
 
-*Example:*
-
+*Example*
 
 ```js
-
 {
 	templates: [
 		{
@@ -110,7 +108,6 @@ Template object:
 
 	]
 }
-
 ```
 
 This input will produce:
@@ -137,7 +134,8 @@ Template.HomePage.helpers({
 **React**
 
 JSX
-```
+
+```js
 export const HomePage = React.createClass({
 	render() {
 		return (
@@ -394,7 +392,8 @@ HTML
 **React**
 
 JSX
-```
+
+```js
 {
 	customers.map(function(item) {
 		return item.name;
@@ -477,6 +476,7 @@ Output:
 **Blaze**
 
 HTML
+
 ```html
 {{#if currentUser}}
 	You are logged in!
@@ -488,7 +488,8 @@ HTML
 **React**
 
 JSX
-```
+
+```js
 {
 	currentUser ? "You are logged in!" : "You are not logged in!"
 }
@@ -503,35 +504,35 @@ JSX
 (not implemented yet)
 
 
-#API Reference
+# API Reference
 
 
-##randomString(len = 17)
+## randomString(len = 17)
 
 Simply returns unique random string. (e.g. `XlE1N31VZA7iGLG43M`)
 
 
-##addId(input, force = true)
+## addId(input, force = true)
 
 Fuction iterates through entire `input` tree and sets each object's `_id` member to random string. If argument `force` is set to `true` then function sets `_id` even if object already have `_id` set (overwrites _id with new unique random value).  
 
 
-##removeId(input)
+## removeId(input)
 
 Fuction iterates through entire `input` tree and removes each object's `_id` member.
 
 
-##findObject(input, objectId)
+## findObject(input, objectId)
 
 Searches `input` for object which `_id` equals `objectId` argument and returns that object. If object is not found then function returns `null`.
 
 
-##findParentObject(input, objectId)
+## findParentObject(input, objectId)
 
 Function returns object's parent.
 
 
-##findParentOfType(input, objectId, parentType)
+## findParentOfType(input, objectId, parentType)
 
 Function searches the tree upwards starting from object's direct parent and returns first element that matches given type.
 
@@ -542,32 +543,32 @@ var template = findParentOfType(input, obj._id, "template");
 ```
 
 
-##selectObject(input, objectId)
+## selectObject(input, objectId)
 
 Object which `_id` equals `objectId` will be marked as selected (member `selected` will be set to true). All other objects will be unselected (member `selected` will be removed).
 
 
-##findSelectedObject(input)
+## findSelectedObject(input)
 
 Function will return (first) object which `selected` property is `true`.
 
 
-##acceptChildren(input, objectId)
+## acceptChildren(input, objectId)
 
 Function returns `true` if object can contain children. Otherwise returns `false`.
 
 
-##addObject(input, parentId, object)
+## addObject(input, parentId, object)
 
 Function will add new object as a child of the object which `_id` equals `parentId`.
 
 
-##removeObject(input, objectId)
+## removeObject(input, objectId)
 
 Object which `_id` equals `objectId` argument will be removed from the input tree.
 
 
-##getBlaze(input, callback)
+## getBlaze(input, callback)
 
 Function returns blaze html and js.
 
@@ -585,7 +586,7 @@ getBlaze(input, function(err, html, js) {
 });
 ```
 
-##getReact(input, callback)
+## getReact(input, callback)
 
 Function returns react jsx.
 
@@ -602,12 +603,12 @@ getReact(input, function(err, jsx) {
 });
 ```
 
-##getAngular(input, callback)
+## getAngular(input, callback)
 
 *Sorry, angular is not supported yet*
 
 
-##getHTML(input, callback)
+## getHTML(input, callback)
 
 Function returns pure static HTML - any control structures (loops, conditions etc.) are ignored, but their html content is included.
 
@@ -624,7 +625,7 @@ getHTML(input, function(err, html) {
 });
 ```
 
-##getWireframe(input, templateName)
+## getWireframe(input, templateName)
 
 Function returns static HTML which can be used by [visual UI](#example-apps).
 
