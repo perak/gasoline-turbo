@@ -494,7 +494,7 @@ var findSelectedObject = function(input) {
 };
 
 var acceptChildren = function(object) {
-	return !(object.type == "text" || object.type == "condition" || (object.type == "html" && voidElements.indexOf(object.element) >= 0));
+	return (object.type == "template" || object.type == "html" || object.type == "condition-true" || object.type == "condition-false" || object.type == "loop") && !(object.type == "text" || object.type == "inclusion" || object.type == "condition" || (object.type == "html" && voidElements.indexOf(object.element) >= 0));
 };
 
 var addObject = function(input, parentId, object) {	
@@ -503,7 +503,7 @@ var addObject = function(input, parentId, object) {
 		return;
 	}
 
-	// text cannot accept children
+	// some elements cannot accept children
 	if(!acceptChildren(parent)) {
 		return;
 	}
@@ -519,7 +519,7 @@ var addObject = function(input, parentId, object) {
 			newObject.children = [];
 		}
 
-		if(!newObject.children.find(c => c.type == "condition-true")) {
+		if(!newObject.children.find(function(c) { return c.type == "condition-true"; })) {
 			var trueNode = {
 				type: "condition-true",
 				children: []
@@ -527,7 +527,7 @@ var addObject = function(input, parentId, object) {
 			newObject.children.push(trueNode);
 		}
 
-		if(!newObject.children.find(c => c.type == "condition-false")) {
+		if(!newObject.children.find(function(c) { return c.type == "condition-false"; })) {
 			var falseNode = {
 				type: "condition-false",
 				children: []
@@ -550,7 +550,7 @@ var removeObject = function(input, objectId) {
 	}
 
 	if(parentObject.templates) {
-		var index = parentObject.templates.findIndex(obj => obj._id == objectId);
+		var index = parentObject.templates.findIndex(function(obj) { return obj._id == objectId; });
 		if(index >= 0) {
 			parentObject.templates.splice(index, 1);
 			return;
@@ -558,7 +558,7 @@ var removeObject = function(input, objectId) {
 	}
 
 	if(parentObject.children) {
-		var index = parentObject.children.findIndex(obj => obj._id == objectId);
+		var index = parentObject.children.findIndex(function(obj) { return obj._id == objectId; });
 		if(index >= 0) {
 			parentObject.children.splice(index, 1);
 			return;
@@ -618,7 +618,7 @@ var getBlaze = function(input, cb) {
 
 				if(child.events) {
 					child.events.map(function(event) {
-						var handler = eventHandlers.find(h => h.name == event.handler);
+						var handler = eventHandlers.find(function(h) { return h.name == event.handler; });
 						if(handler) {
 							handler.selectors = handler.selectors || [];
 
@@ -632,7 +632,7 @@ var getBlaze = function(input, cb) {
 							if(!childSelector) {
 								// No selector. Try element id...
 								if(child.attributes) {
-									var idAttr = child.attributes.find(attr => attr.name == "id");
+									var idAttr = child.attributes.find(function(attr) { return attr.name == "id"; });
 									if(idAttr && idAttr.value) {
 										childSelector = "#" + idAttr.value;
 									}
@@ -642,7 +642,7 @@ var getBlaze = function(input, cb) {
 							if(!childSelector) {
 								// No selector. Try element class...
 								if(child.attributes) {
-									var classAttr = child.attributes.find(attr => attr.name == "class");
+									var classAttr = child.attributes.find(function(attr) { return attr.name == "class"; });
 									if(classAttr && classAttr.value) {
 										childSelector = ("." + classAttr.value + "").split(" ").join(".");
 									}
@@ -690,8 +690,8 @@ var getBlaze = function(input, cb) {
 				var trueNode = null;
 				var falseNode = null;
 				if(child.children) {
-					trueNode = child.children.find(c => c.type == "condition-true");
-					falseNode = child.children.find(c => c.type == "condition-false");
+					trueNode = child.children.find(function(c) { return c.type == "condition-true"; });
+					falseNode = child.children.find(function(c) { return c.type == "condition-false"; });
 				}
 
 				if(trueNode && trueNode.children) {
@@ -1004,7 +1004,11 @@ var getReact = function(input, cb) {
 					});
 				}
 
-				jsx += ">\n";
+				if(isVoid) {
+					jsx += " />\n";
+				} else {
+					jsx += ">\n";
+				}
 
 				if(!isVoid) {
 					if(child.children) {
@@ -1074,8 +1078,8 @@ var getReact = function(input, cb) {
 				var trueNode = null;
 				var falseNode = null;
 				if(child.children) {
-					trueNode = child.children.find(c => c.type == "condition-true");
-					falseNode = child.children.find(c => c.type == "condition-false");
+					trueNode = child.children.find(function(c) { return c.type == "condition-true"; });
+					falseNode = child.children.find(function(c) { return c.type == "condition-false"; });
 				}
 
 				if(trueNode && trueNode.children) {
@@ -1293,8 +1297,8 @@ var getHTML = function(input, cb) {
 				var trueNode = null;
 				var falseNode = null;
 				if(child.children) {
-					trueNode = child.children.find(c => c.type == "condition-true");
-					falseNode = child.children.find(c => c.type == "condition-false");
+					trueNode = child.children.find(function(c) { return c.type == "condition-true"; });
+					falseNode = child.children.find(function(c) { return c.type == "condition-false"; });
 				}
 
 				if(trueNode && trueNode.children) {
@@ -1561,7 +1565,7 @@ var getWireframe = function(input, templateName) {
 		return "";
 	}
 
-	var template = input.templates.find(x => x.name == templateName);
+	var template = input.templates.find(function(x) { return x.name == templateName; });
 	if(!template) {
 		return "";
 	}
@@ -1593,7 +1597,7 @@ var getWireframe = function(input, templateName) {
 		containerClass += " gasoline-turbo-selected";
 	}
 
-	containers += "<div class=\"" + containerClass + "\" data-id=\"" + template._id + "\">";
+	containers += "<div class=\"" + containerClass + "\" data-id=\"" + template._id + "\" draggable=\"true\">";
 
 
 	html += "<div class=\"gas-element gas-template\" data-id=\"" + template._id + "\">\n";
@@ -1620,32 +1624,29 @@ var getWireframe = function(input, templateName) {
 
 // ===
 
+this.gasoline = {
+	randomString: randomString,
+	addId: addId,
+	removeId: removeId,
 
-if(typeof module != "undefined" && module.exports) {
-	exports.randomString = randomString;
-	exports.addId = addId;
-	exports.removeId = removeId;
+	findObject: findObject,
+	findParentObject: findParentObject,
+	findParentOfType: findParentOfType,
 
-	exports.findObject = findObject;
-	exports.findObjectsBySelector = findObjectsBySelector;
-	exports.findParentObject = findParentObject;
-	exports.findParentOfType = findParentOfType;
+	findSelectedObject: findSelectedObject,
+	selectObject: selectObject,
 
-	exports.findSelectedObject = findSelectedObject;
-	exports.selectObject = selectObject;
+	acceptChildren: acceptChildren,
+	addObject: addObject,
+	removeObject: removeObject,
 
-	exports.acceptChildren = acceptChildren;
-	exports.addObject = addObject;
-	exports.removeObject = removeObject;
+	getBlaze: getBlaze,
+	getReact: getReact,
+	getAngular: getAngular,
 
-	exports.getBlaze = getBlaze;
-	exports.getReact = getReact;
-	exports.getAngular = getAngular;
+	getHTML: getHTML,
 
-	exports.getHTML = getHTML;
+	getWireframe: getWireframe,
 
-	exports.getWireframe = getWireframe;
-
-	exports.reactEvents = reactEvents;
-
-}
+	reactEvents: reactEvents
+};
