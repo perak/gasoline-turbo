@@ -1630,6 +1630,7 @@ this.gasoline = {
 	removeId: removeId,
 
 	findObject: findObject,
+	findObjectsBySelector: findObjectsBySelector,
 	findParentObject: findParentObject,
 	findParentOfType: findParentOfType,
 
