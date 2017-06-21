@@ -1123,7 +1123,13 @@ var getReact = function(input, cb) {
 			case "inclusion": {
 
 				jsx += getTabs(depth);
-				jsx += "<" + child.template + " />";
+
+				if(child.template == "yield") {
+					jsx += "{this.props.content}";
+				} else {
+					jsx += "<" + child.template + " />";
+				}
+
 				jsx += "\n";
 
 			}; break;
