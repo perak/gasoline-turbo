@@ -854,9 +854,17 @@ var getBlaze = function(input, cb) {
 // ============
 // REACT
 // ============
+//
+// options = {
+//   createContainer: true   # create Meteor container code
+//   meteorKitchen: true     # create Meteor Kitchen specific code
+// }
+//
 
+var getReact = function(input, cb, options) {
 
-var getReact = function(input, cb) {
+	var opt = options || {};
+
 	var jsx = "";
 
 	var replaceSpecialVars = function(s) {
@@ -1159,7 +1167,34 @@ var getReact = function(input, cb) {
 			jsx += "\n";
 		}
 
-		jsx += "export const " + template.name + " = React.createClass({\n";
+		if(opt.createContainer) {
+			jsx += "/*IMPORTS*/\n\n";
+		}
+
+		jsx += "export class " + template.name + " extends Component {\n";
+		jsx += "\n\tconstructor() {\n";
+		jsx += "\t\tsuper();\n";
+		jsx += "\t}\n";
+
+
+		jsx += "\n\tcomponentWillMount() {\n";
+		jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_CREATED_CODE*/\n" : "\n";
+		jsx += "\t}\n";
+
+		jsx += "\n\tcomponentWillUnmount() {\n";
+		jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_DESTROYED_CODE*/\n" : "\n";
+		jsx += "\t}\n";
+
+		jsx += "\n\tcomponentDidMount() {\n";
+		if(opt.meteorKitchen) {
+			jsx += "\t\t/*TEMPLATE_RENDERED_CODE*/\n";
+			jsx += "\n\t\tMeteor.defer(function() {\n";
+			jsx += "\t\t\tglobalOnRendered();\n";
+			jsx += "\t\t});\n";
+		} else {
+			jsx += "\n";
+		}
+		jsx += "\t}\n";
 
 		// Helpers
 		if(template.helpers) {
@@ -1215,6 +1250,12 @@ var getReact = function(input, cb) {
 		jsx += "\t\t);\n";
 		jsx += "\t}\n";
 		jsx += "});";
+
+		if(opt.createContainer) {
+			jsx += "\n\nexport const " + template.name + "Container = createContainer(function(props) {\n";
+			jsx += opt.meteorKitchen ? "\t/*SUBSCRIPTIONS*/\n" : "\n";
+			jsx += "}, " + template.name + ");";
+		}
 	});
 
 	if(!error) {
