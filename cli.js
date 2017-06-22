@@ -107,7 +107,7 @@ switch(outputFormat) {
 	case "blaze": {
 		console.log("");
 		console.log("Converting to Blaze...");
-		gt.gasoline.getBlaze(inputObject, function(err, html, js) {
+		gt.getBlaze(inputObject, function(err, html, js) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);
@@ -125,7 +125,7 @@ switch(outputFormat) {
 	case "react": {
 		console.log("");
 		console.log("Converting to React...");
-		gt.gasoline.getReact(inputObject, function(err, jsx) {
+		gt.getReact(inputObject, function(err, jsx) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);
@@ -143,7 +143,7 @@ switch(outputFormat) {
 	case "angular": {
 		console.log("");
 		console.log("Converting to Angular...");
-		gt.gasoline.getAngular(inputObject, function(err /* ,html, ...??? */) {
+		gt.getAngular(inputObject, function(err /* ,html, ...??? */) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);
@@ -162,7 +162,7 @@ switch(outputFormat) {
 	case "html": {
 		console.log("");
 		console.log("Converting to static HTML...");
-		gt.gasoline.getHTML(inputObject, function(err, html) {
+		gt.getHTML(inputObject, function(err, html) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);

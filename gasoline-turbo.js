@@ -1671,7 +1671,7 @@ var getWireframe = function(input, templateName) {
 
 // ===
 
-this.gasoline = {
+var gt = {
 	randomString: randomString,
 	addId: addId,
 	removeId: removeId,
@@ -1698,3 +1698,9 @@ this.gasoline = {
 
 	reactEvents: reactEvents
 };
+
+if(typeof module != "undefined" && module.exports) {
+	module.exports = gt;
+} else {
+	this.gasoline = gt;
+}
