@@ -570,7 +570,14 @@ var removeObject = function(input, objectId) {
 // BLAZE
 // ============
 
-var getBlaze = function(input, cb) {
+var getBlaze = function(inputObject, cb) {
+	if(!inputObject) {
+		cb(new Error("Error: invalid input object.", "", ""));
+		return;
+	}
+
+	var input = JSON.parse(JSON.stringify(inputObject));
+
 	var html = "";
 	var js = "";
 	var eventHandlers = [];
@@ -737,8 +744,16 @@ var getBlaze = function(input, cb) {
 	};
 
 	if(!input.templates) {
-		cb(new Error("Error: no templates found.", html, js));
-		return;
+		if(input.type == "template") {
+			var tmpt = JSON.parse(JSON.stringify(input));
+			input = {
+				templates: []
+			}
+			input.templates.push(tmpt);
+		} else {
+			cb(new Error("Error: no templates found.", html, js));
+			return;
+		}
 	}
 
 	var error = false;
@@ -861,7 +876,13 @@ var getBlaze = function(input, cb) {
 // }
 //
 
-var getReact = function(input, cb, options) {
+var getReact = function(inputObject, cb, options) {
+	if(!inputObject) {
+		cb(new Error("Error: invalid input object.", ""));
+		return;
+	}
+
+	var input = JSON.parse(JSON.stringify(inputObject));
 
 	var opt = options || {};
 
@@ -1144,10 +1165,17 @@ var getReact = function(input, cb, options) {
 		}
 	};
 
-
 	if(!input.templates) {
-		cb(new Error("Error: no templates found.", jsx));
-		return;
+		if(input.type == "template") {
+			var tmpt = JSON.parse(JSON.stringify(input));
+			input = {
+				templates: []
+			}
+			input.templates.push(tmpt);
+		} else {
+			cb(new Error("Error: no templates found.", jsx));
+			return;
+		}
 	}
 
 	var error = false;
@@ -1281,7 +1309,15 @@ var getAngular = function(input, cb) {
 // HTML
 // ============
 
-var getHTML = function(input, cb) {
+var getHTML = function(inputObject, cb) {
+	if(!inputObject) {
+		cb(new Error("Error: invalid input object.", ""));
+		return;
+	}
+
+	var input = JSON.parse(JSON.stringify(inputObject));
+
+
 	var html = "";
 
 	var addChild = function(child, depth, context) {
@@ -1394,8 +1430,16 @@ var getHTML = function(input, cb) {
 	};
 
 	if(!input.templates) {
-		cb(new Error("Error: no templates found.", html));
-		return;
+		if(input.type == "template") {
+			var tmpt = JSON.parse(JSON.stringify(input));
+			input = {
+				templates: []
+			}
+			input.templates.push(tmpt);
+		} else {
+			cb(new Error("Error: no templates found.", html));
+			return;			
+		}
 	}
 
 	var error = false;
@@ -1442,7 +1486,13 @@ var getHTML = function(input, cb) {
 // HTML for Visual Designer
 // ========================
 
-var getWireframe = function(input, templateName) {
+var getWireframe = function(inputObject, templateName) {
+	if(!inputObject) {
+		return "";
+	}
+
+	var input = JSON.parse(JSON.stringify(inputObject));
+
 	var html = "";
 	var containers = "";
 
@@ -1609,7 +1659,15 @@ var getWireframe = function(input, templateName) {
 	};
 
 	if(!input.templates) {
-		return "";
+		if(input.type == "template") {
+			var tmpt = JSON.parse(JSON.stringify(input));
+			input = {
+				templates: []
+			}
+			input.templates.push(tmpt);
+		} else {
+			return "";
+		}
 	}
 
 	var template = input.templates.find(function(x) { return x.name == templateName; });

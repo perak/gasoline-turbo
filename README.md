@@ -13,18 +13,28 @@ Project status
 
 Under development - just started.
 
+**Angular is not supported yet.** Contributions are welcome - please write `getAngular` function.
+
 
 Example apps
 ============
+
+### Meteor Kitchen
+
+- <a href="https://www.meteorkitchen.com" target="_blank">Meteor Kitchen UI</a> is using gasoline-turbo. See <a href="https://www.youtube.com/watch?v=8Gr2oioZDG8" target="_blank">Preview video at Youtube</a>.
 
 
 ### Gasoline Visual UI
 
 - Minimal example application using this package is here: [https://gasoline-turbo.meteorfarm.com](https://gasoline-turbo.meteorfarm.com).
 
-### Meteor Kitchen
 
-- <a href="https://www.meteorkitchen.com" target="_blank">Meteor Kitchen UI</a> will use gasoline soon. See <a href="https://www.youtube.com/watch?v=8Gr2oioZDG8" target="_blank">Preview video at Youtube</a>.
+
+Related projects
+================
+
+- <a href="https://www.npmjs.com/package/blaze2gasoline" target="_blank">blaze2gasoline</a> - converts Meteor Blaze template (html and js) to input for gasoline-turbo (and from that point you can convert to React or Angular).
+
 
 
 Usage
