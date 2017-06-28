@@ -743,7 +743,7 @@ var getBlaze = function(inputObject, cb) {
 		}
 	};
 
-	if(!input.templates) {
+	if(!input.templates && !input.naked) {
 		if(input.type == "template") {
 			var tmpt = JSON.parse(JSON.stringify(input));
 			input = {
@@ -757,107 +757,115 @@ var getBlaze = function(inputObject, cb) {
 	}
 
 	var error = false;
-	input.templates.map(function(template) {
-		if(template.type != "template") {
-			error = true;
-			cb(new Error("Error: unknown template type: \"" + template.type + "\"", html, js));
-			return;
-		}
-		if(!template.name) {
-			error = true;
-			cb(new Error("Error: invalid template name \"" + template.name + "\"", html, js));
-			return;
-		}
-
-		eventHandlers = [];
-		if(template.handlers) {
-			eventHandlers = JSON.parse(JSON.stringify(template.handlers));
-		}
-
-		// ====
-		// HTML
-		// ====
-
-		if(html) {
-			html += "\n";
-		}
-
-		html += "<template name=\"" + template.name + "\">\n";
-
-		if(template.children) {
-			template.children.map(function(child) {
-				addChild(child, 1, "this");
-			});
-		}
-
-		html += "</template>\n";
-		html += "\n";
-
-
-		// ===
-		// JS
-		// ===
-
-
-		// ------
-		// Events
-		// ------
-
-		js += "\n\n";
-		js += "Template." + template.name + ".events({\n";
-
-		var events = "";
-		eventHandlers.map(function(handler) {
-			if(handler.selectors && handler.selectors.length) {
-				if(events) {
-					events += ",\n\n";
-				}
-
-				var selectors = "";
-				handler.selectors.map(function(selector) {
-					if(selectors) {
-						selectors += ", ";
-					}
-					selectors += selector;
-				});
-
-				events += "\t\"" + selectors + "\": function(e, t) {\n";
-				var handlerCode = replaceSpecialVars(handler.code);
-				events += identMultilineString(handlerCode, 2) + "\n";
-				events += "\t}";
+	if(input.templates) {
+		input.templates.map(function(template) {
+			if(template.type != "template") {
+				error = true;
+				cb(new Error("Error: unknown template type: \"" + template.type + "\"", html, js));
+				return;
 			}
-		});
+			if(!template.name) {
+				error = true;
+				cb(new Error("Error: invalid template name \"" + template.name + "\"", html, js));
+				return;
+			}
 
-		js += events + "\n";
-		js += "});";
+			eventHandlers = [];
+			if(template.handlers) {
+				eventHandlers = JSON.parse(JSON.stringify(template.handlers));
+			}
+
+			// ====
+			// HTML
+			// ====
+
+			if(html) {
+				html += "\n";
+			}
+
+			html += "<template name=\"" + template.name + "\">\n";
+
+			if(template.children) {
+				template.children.map(function(child) {
+					addChild(child, 1, "this");
+				});
+			}
+
+			html += "</template>\n";
+			html += "\n";
 
 
-		// ------
-		// helpers
-		// ------
+			// ===
+			// JS
+			// ===
 
-		js += "\n\n";
-		js += "Template." + template.name + ".helpers({\n";
 
-		var helpers = "";
-		if(template.helpers) {
-			template.helpers.map(function(helper) {
-				if(helpers) {
-					helpers += ",\n\n";
+			// ------
+			// Events
+			// ------
+
+			js += "\n\n";
+			js += "Template." + template.name + ".events({\n";
+
+			var events = "";
+			eventHandlers.map(function(handler) {
+				if(handler.selectors && handler.selectors.length) {
+					if(events) {
+						events += ",\n\n";
+					}
+
+					var selectors = "";
+					handler.selectors.map(function(selector) {
+						if(selectors) {
+							selectors += ", ";
+						}
+						selectors += selector;
+					});
+
+					events += "\t\"" + selectors + "\": function(e, t) {\n";
+					var handlerCode = replaceSpecialVars(handler.code);
+					events += identMultilineString(handlerCode, 2) + "\n";
+					events += "\t}";
 				}
-
-				var helperArgs = helper.arguments || [];
-				helpers += "\t" + helper.name + ": function(" + helperArgs.join(", ") + ") {\n";
-
-				var helperCode = replaceSpecialVars(helper.code);
-				helpers += identMultilineString(helperCode, 2) + "\n";
-				helpers += "\t}";
 			});
-		}
 
-		js += helpers + "\n";
-		js += "});";
-	});
+			js += events + "\n";
+			js += "});";
+
+
+			// ------
+			// helpers
+			// ------
+
+			js += "\n\n";
+			js += "Template." + template.name + ".helpers({\n";
+
+			var helpers = "";
+			if(template.helpers) {
+				template.helpers.map(function(helper) {
+					if(helpers) {
+						helpers += ",\n\n";
+					}
+
+					var helperArgs = helper.arguments || [];
+					helpers += "\t" + helper.name + ": function(" + helperArgs.join(", ") + ") {\n";
+
+					var helperCode = replaceSpecialVars(helper.code);
+					helpers += identMultilineString(helperCode, 2) + "\n";
+					helpers += "\t}";
+				});
+			}
+
+			js += helpers + "\n";
+			js += "});";
+		});
+	}
+
+	if(input.naked && input.naked.children) {
+		input.naked.children.map(function(child) {
+			addChild(child, 0, "this");
+		});
+	}
 
 	if(!error) {
 		cb(null, html, js);
@@ -1165,7 +1173,7 @@ var getReact = function(inputObject, cb, options) {
 		}
 	};
 
-	if(!input.templates) {
+	if(!input.templates && !input.naked) {
 		if(input.type == "template") {
 			var tmpt = JSON.parse(JSON.stringify(input));
 			input = {
@@ -1179,112 +1187,120 @@ var getReact = function(inputObject, cb, options) {
 	}
 
 	var error = false;
-	input.templates.map(function(template) {
-		if(template.type != "template") {
-			error = true;
-			cb(new Error("Error: unknown template type: \"" + template.type + "\"", jsx));
-			return;
-		}
-		if(!template.name) {
-			error = true;
-			cb(new Error("Error: invalid template name \"" + template.name + "\"", jsx));
-			return;
-		}
+	if(input.templates) {
+		input.templates.map(function(template) {
+			if(template.type != "template") {
+				error = true;
+				cb(new Error("Error: unknown template type: \"" + template.type + "\"", jsx));
+				return;
+			}
+			if(!template.name) {
+				error = true;
+				cb(new Error("Error: invalid template name \"" + template.name + "\"", jsx));
+				return;
+			}
 
-		if(jsx) {
-			jsx += "\n";
-		}
+			if(jsx) {
+				jsx += "\n";
+			}
 
-		if(opt.createContainer) {
-			jsx += "/*IMPORTS*/\n\n";
-		}
+			if(opt.createContainer) {
+				jsx += "/*IMPORTS*/\n\n";
+			}
 
-		jsx += "export class " + template.name + " extends Component {\n";
-		jsx += "\n\tconstructor() {\n";
-		jsx += "\t\tsuper();\n";
-		jsx += "\t}\n";
+			jsx += "export class " + template.name + " extends Component {\n";
+			jsx += "\n\tconstructor() {\n";
+			jsx += "\t\tsuper();\n";
+			jsx += "\t}\n";
 
 
-		jsx += "\n\tcomponentWillMount() {\n";
-		jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_CREATED_CODE*/\n" : "\n";
-		jsx += "\t}\n";
+			jsx += "\n\tcomponentWillMount() {\n";
+			jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_CREATED_CODE*/\n" : "\n";
+			jsx += "\t}\n";
 
-		jsx += "\n\tcomponentWillUnmount() {\n";
-		jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_DESTROYED_CODE*/\n" : "\n";
-		jsx += "\t}\n";
+			jsx += "\n\tcomponentWillUnmount() {\n";
+			jsx += opt.meteorKitchen ? "\t\t/*TEMPLATE_DESTROYED_CODE*/\n" : "\n";
+			jsx += "\t}\n";
 
-		jsx += "\n\tcomponentDidMount() {\n";
-		if(opt.meteorKitchen) {
-			jsx += "\t\t/*TEMPLATE_RENDERED_CODE*/\n";
-			jsx += "\n\t\tMeteor.defer(function() {\n";
-			jsx += "\t\t\tglobalOnRendered();\n";
-			jsx += "\t\t});\n";
-		} else {
-			jsx += "\n";
-		}
-		jsx += "\t}\n";
-
-		// Helpers
-		if(template.helpers) {
-			template.helpers.map(function(helper) {
-				jsx += "\n\t" + helper.name + "(";
-				if(helper.arguments) {
-					var argStr = "";
-					helper.arguments.map(function(arg) {
-						if(argStr) {
-							argStr += ", ";
-						}
-						argStr += arg;
-					});
-					jsx += argStr;
-				}
-				jsx += ") {\n";
-				var helperCode = replaceSpecialVars(helper.code);
-				jsx += identMultilineString(helperCode, 2);
-				jsx += "\n\t},\n";
-			});
-		}
-
-		// Event handlers
-		if(template.handlers) {
-			template.handlers.map(function(handler) {
-				jsx += "\n\t" + handler.name + "(e) {\n";
-				var handlerCode = replaceSpecialVars(handler.code);
-				jsx += identMultilineString(handlerCode, 2);
-				jsx += "\n\t},\n";
-			});
-		}
-
-		// Render
-		jsx += "\n\trender() {\n";
-		jsx += "\t\treturn (\n";
-
-		if(template.children) {
-			if(template.children.length > 1) {
-				jsx += "\t\t\t<div>\n";
-				template.children.map(function(child) {
-					addChild(child, 4, "this");
-				});
-				jsx += "\n\t\t\t</div>\n";
+			jsx += "\n\tcomponentDidMount() {\n";
+			if(opt.meteorKitchen) {
+				jsx += "\t\t/*TEMPLATE_RENDERED_CODE*/\n";
+				jsx += "\n\t\tMeteor.defer(function() {\n";
+				jsx += "\t\t\tglobalOnRendered();\n";
+				jsx += "\t\t});\n";
 			} else {
-				template.children.map(function(child) {
-					addChild(child, 3, "this");
+				jsx += "\n";
+			}
+			jsx += "\t}\n";
+
+			// Helpers
+			if(template.helpers) {
+				template.helpers.map(function(helper) {
+					jsx += "\n\t" + helper.name + "(";
+					if(helper.arguments) {
+						var argStr = "";
+						helper.arguments.map(function(arg) {
+							if(argStr) {
+								argStr += ", ";
+							}
+							argStr += arg;
+						});
+						jsx += argStr;
+					}
+					jsx += ") {\n";
+					var helperCode = replaceSpecialVars(helper.code);
+					jsx += identMultilineString(helperCode, 2);
+					jsx += "\n\t},\n";
 				});
 			}
-		} else {
-			jsx += "\t\t\t<div></div>\n";
-		}
 
-		jsx += "\t\t);\n";
-		jsx += "\t}\n";
-		jsx += "});";
+			// Event handlers
+			if(template.handlers) {
+				template.handlers.map(function(handler) {
+					jsx += "\n\t" + handler.name + "(e) {\n";
+					var handlerCode = replaceSpecialVars(handler.code);
+					jsx += identMultilineString(handlerCode, 2);
+					jsx += "\n\t},\n";
+				});
+			}
 
-		if(opt.createContainer) {
-			jsx += "\n\nexport const " + template.name + "Container = createContainer(function(props) {\n";
-			jsx += opt.meteorKitchen ? "\t/*SUBSCRIPTIONS*/\n" : "\n";
-			jsx += "}, " + template.name + ");";
-		}
-	});
+			// Render
+			jsx += "\n\trender() {\n";
+			jsx += "\t\treturn (\n";
+
+			if(template.children) {
+				if(template.children.length > 1) {
+					jsx += "\t\t\t<div>\n";
+					template.children.map(function(child) {
+						addChild(child, 4, "this");
+					});
+					jsx += "\n\t\t\t</div>\n";
+				} else {
+					template.children.map(function(child) {
+						addChild(child, 3, "this");
+					});
+				}
+			} else {
+				jsx += "\t\t\t<div></div>\n";
+			}
+
+			jsx += "\t\t);\n";
+			jsx += "\t}\n";
+			jsx += "});";
+
+			if(opt.createContainer) {
+				jsx += "\n\nexport const " + template.name + "Container = createContainer(function(props) {\n";
+				jsx += opt.meteorKitchen ? "\t/*SUBSCRIPTIONS*/\n" : "\n";
+				jsx += "}, " + template.name + ");";
+			}
+		});
+	}
+
+	if(input.naked && input.naked.children) {
+		input.naked.children.map(function(child) {
+			addChild(child, 0, "this");
+		});
+	}
 
 	if(!error) {
 		cb(null, jsx);
@@ -1429,7 +1445,7 @@ var getHTML = function(inputObject, cb) {
 		}
 	};
 
-	if(!input.templates) {
+	if(!input.templates && !input.naked) {
 		if(input.type == "template") {
 			var tmpt = JSON.parse(JSON.stringify(input));
 			input = {
@@ -1443,38 +1459,46 @@ var getHTML = function(inputObject, cb) {
 	}
 
 	var error = false;
-	input.templates.map(function(template) {
-		if(template.type != "template") {
-			error = true;
-			cb(new Error("Error: unknown template type: \"" + template.type + "\"", html));
-			return;
-		}
-		if(!template.name) {
-			error = true;
-			cb(new Error("Error: invalid template name \"" + template.name + "\"", html));
-			return;
-		}
+	if(input.templates) {
+		input.templates.map(function(template) {
+			if(template.type != "template") {
+				error = true;
+				cb(new Error("Error: unknown template type: \"" + template.type + "\"", html));
+				return;
+			}
+			if(!template.name) {
+				error = true;
+				cb(new Error("Error: invalid template name \"" + template.name + "\"", html));
+				return;
+			}
 
-		if(template.handlers) {
-			eventHandlers = JSON.parse(JSON.stringify(template.handlers));
-		}
+			if(template.handlers) {
+				eventHandlers = JSON.parse(JSON.stringify(template.handlers));
+			}
 
-		// ====
-		// HTML
-		// ====
+			// ====
+			// HTML
+			// ====
 
-		if(html) {
-			html += "\n";
-		}
+			if(html) {
+				html += "\n";
+			}
 
-		if(template.children && template.children.length) {
-			template.children.map(function(child) {
-				addChild(child, 1);
-			});
+			if(template.children && template.children.length) {
+				template.children.map(function(child) {
+					addChild(child, 1);
+				});
 
-			html += "\n";
-		}
-	});
+				html += "\n";
+			}
+		});
+	}
+
+	if(input.naked && input.naked.children) {
+		input.naked.children.map(function(child) {
+			addChild(child, 0);
+		});
+	}
 
 	if(!error) {
 		cb(null, html);
