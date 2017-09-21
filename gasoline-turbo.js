@@ -1286,7 +1286,7 @@ var getReact = function(inputObject, cb, options) {
 
 			jsx += "\t\t);\n";
 			jsx += "\t}\n";
-			jsx += "});";
+			jsx += "}";
 
 			if(opt.createContainer) {
 				jsx += "\n\nexport const " + template.name + "Container = createContainer(function(props) {\n";

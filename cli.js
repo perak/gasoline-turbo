@@ -10,6 +10,7 @@ const optionDefinitions = [
   { name: "input", alias: "i", type: String },
   { name: "output", alias: "o", type: String },
   { name: "format", alias: "f", type: String },
+  { name: "kitchen", alias: "k", type: Boolean },
   { name: "overwrite", alias: "w", type: Boolean}
 ];
 
@@ -24,7 +25,9 @@ var printUsage = function() {
 	console.log("\tgasoline-turbo -i input.json -o output_dir -f blaze");
 	console.log("\t\t-i, --input\tInput file");
 	console.log("\t\t-o, --output\tOutput directory");
-	console.log("\t\t-f, --format\tOutput format. Can be \"blaze\", \"react\", \"angular\" or \"html\". Default: \"blaze\".");
+	console.log("\t\t-f, --format\tOutput format. Can be \"blaze\", \"react\", \"angular\" or \"html\". Default: \"blaze\"");
+	console.log("\t\t-k, --kitchen\tGenerate \"Meteor Kitchen\" specific code.");
+	console.log("\t\t-c, --container\tGenerate \"Meteor\" container (React only).");
 	console.log("\t\t-w, --overwrite\tOverwrite existing output files.");
 	console.log("");
 	console.log("Enjoy! (and expect bugs)");
@@ -125,7 +128,12 @@ switch(outputFormat) {
 	case "react": {
 		console.log("");
 		console.log("Converting to React...");
-		gt.getReact(inputObject, function(err, jsx) {
+
+		var opt = {
+			meteorKitchen:   !!args.kitchen,
+			createContainer: !!args.container
+		};
+		gt.getReact(inputObject, function(err, jsx, opt) {
 			if(err) {
 				console.log(err.message);
 				process.exit(1);
