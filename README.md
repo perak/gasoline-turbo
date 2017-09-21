@@ -49,15 +49,17 @@ When installed globally as npm module `npm install -g gasoline-turbo`, you can r
 
 ```
 gasoline-turbo -i input.json -o output_dir -f blaze
-	-i, --input 	Input file
+	-i, --input	Input file
 	-o, --output	Output directory
-	-f, --format	Output format. Can be "blaze", "react", "angular" or "html". Default: "blaze".
+	-f, --format	Output format. Can be "blaze", "react", "angular" or "html". Default: "blaze"
+	-k, --kitchen	Generate "Meteor Kitchen" specific code.
+	-c, --container	Generate "Meteor" container (React only).
 	-w, --overwrite	Overwrite existing output files.
 ```
 
 Or you can add it to your node.js (or Meteor) application by running `meteor npm install --save gasoline-turbo` and in your code:
 
-```
+```js
 const gasoline = require("gasoline-turbo");
 ```
 
