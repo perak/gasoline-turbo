@@ -1119,7 +1119,7 @@ var getReact = function(inputObject, cb, options) {
 					falseNode = child.children.find(function(c) { return c.type == "condition-false"; });
 				}
 
-				if(trueNode && trueNode.children) {
+				if(trueNode && trueNode.children && trueNode.children.length) {
 					trueNode.children.map(function(ch) {
 						addChild(ch, depth + 1, context);
 					});
@@ -1130,7 +1130,7 @@ var getReact = function(inputObject, cb, options) {
 				jsx += getTabs(depth);
 				jsx += ") : (\n";
 
-				if(falseNode && falseNode.children) {
+				if(falseNode && falseNode.children && falseNode.children.length) {
 					falseNode.children.map(function(ch) {
 						addChild(ch, depth + 1, context);
 					});
