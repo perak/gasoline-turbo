@@ -1250,7 +1250,7 @@ var getReact = function(inputObject, cb, options) {
 					jsx += ") {\n";
 					var helperCode = replaceSpecialVars(helper.code);
 					jsx += identMultilineString(helperCode, 2);
-					jsx += "\n\t},\n";
+					jsx += "\n\t}\n";
 				});
 			}
 
@@ -1260,7 +1260,7 @@ var getReact = function(inputObject, cb, options) {
 					jsx += "\n\t" + handler.name + "(e) {\n";
 					var handlerCode = replaceSpecialVars(handler.code);
 					jsx += identMultilineString(handlerCode, 2);
-					jsx += "\n\t},\n";
+					jsx += "\n\t}\n";
 				});
 			}
 
