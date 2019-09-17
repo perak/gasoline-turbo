@@ -1,6 +1,6 @@
 {
   "name": "gasoline-turbo",
-  "version": "0.3.4",
+  "version": "0.3.6",
   "description": "Generic Template - generates Blaze, React and Angular code from the same json input",
   "main": "gasoline-turbo.js",
   "scripts": {

@@ -1268,7 +1268,7 @@ var getReact = function(inputObject, cb, options) {
 			jsx += "\n\trender() {\n";
 			jsx += "\t\treturn (\n";
 
-			if(template.children) {
+			if(template.children && template.children.length) {
 				if(template.children.length > 1) {
 					jsx += "\t\t\t<div>\n";
 					template.children.map(function(child) {

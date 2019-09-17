@@ -26,13 +26,7 @@ Example apps
 
 ### Blaze to React online converter
 
-- Live application is here: <a href="https://blaze2react.meteorcluster.com/" target="_blank">blaze2react</a>. You can find source code (kitchen project) <a href="https://www.meteorkitchen.com/app_details/about/zxuskE3GStoffJWmn" target="_blank">here</a>.
-
-
-### Gasoline Visual UI
-
-- Minimal example application using this package is here: [https://gasoline-turbo.meteorfarm.com](https://gasoline-turbo.meteorfarm.com).
-
+- Live application is here: <a href="https://blaze2react.meteorfarm.com/" target="_blank">blaze2react</a>. You can find source code (kitchen project) <a href="https://www.meteorkitchen.com/app_details/about/zxuskE3GStoffJWmn" target="_blank">here</a>.
 
 
 Related projects
